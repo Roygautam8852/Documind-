@@ -1,4 +1,4 @@
-"""End-to-end RAG query pipeline orchestrator."""
+"""End-to-end RAG query pipeline orchestrator with advanced retrieval."""
 
 from __future__ import annotations
 
@@ -15,10 +15,15 @@ from app.models.document import Document
 from app.models.message import Message
 from app.providers.embeddings.factory import get_embedding_provider
 from app.providers.llm.factory import get_llm_provider
+from app.providers.reranker.factory import get_reranker
+from app.providers.vector_store.base import VectorSearchResult
 from app.providers.vector_store.factory import get_vector_store
 from app.rag.abstention import ABSTENTION_MESSAGE, should_abstain
+from app.rag.bm25 import BM25Retriever
 from app.rag.citation_service import CitationService
+from app.rag.fusion import reciprocal_rank_fusion
 from app.rag.prompt_builder import PromptBuilder
+from app.rag.query_reformulator import QueryReformulator
 from app.schemas.chat import ChatQueryResponse, CitationItem, RetrievalMeta
 
 logger = logging.getLogger(__name__)
@@ -36,21 +41,25 @@ async def query_rag(
     """Execute the full RAG pipeline for a user query.
 
     Stages:
-    0. Resolve or create conversation thread and load recent history.
+    0. Resolve/create conversation thread and load recent history.
     1. Validate document accessibility and ready status.
-    2. Embed the question into vector space.
-    3. Retrieve relevant chunks with multi-tenant filtering.
-    4. Abstain if evidence is insufficient or below similarity threshold.
-    5. Construct structured prompt with assigned source IDs and conversation context.
-    6. Generate completion via the configured LLM provider.
-    7. Validate citation markers against retrieved evidence.
-    8. Persist conversation turn (user + assistant) to database.
-    9. Return grounded response with source citations and conversation_id.
+    2. Reformulate query if follow-up turn in a conversation.
+    3. Retrieve chunks via dense vector search.
+    4. Retrieve chunks via sparse BM25 lexical search (if hybrid enabled).
+    5. Merge rankings using Reciprocal Rank Fusion (RRF).
+    6. Apply cross-encoder reranking if configured.
+    7. Abstain if evidence is insufficient or below similarity threshold.
+    8. Construct structured prompt with assigned source IDs and conversation context.
+    9. Generate completion via the configured LLM provider.
+    10. Validate citation markers against retrieved evidence.
+    11. Persist conversation turn (user + assistant) to database.
+    12. Return grounded response with source citations and conversation_id.
     """
     cfg = settings or get_settings()
     vector_store = get_vector_store(cfg)
     embedding_provider = get_embedding_provider(cfg)
     llm_provider = get_llm_provider(cfg)
+    reranker = get_reranker(cfg)
 
     # 0. Resolve or create conversation thread
     conversation: Conversation
@@ -87,7 +96,7 @@ async def query_rag(
     async def _persist_and_respond(
         ans: str,
         citations_list: list[CitationItem],
-        result_count: int,
+        retrieval_meta: RetrievalMeta,
     ) -> ChatQueryResponse:
         user_msg = Message(
             conversation_id=conversation.id,
@@ -103,7 +112,7 @@ async def query_rag(
             role="assistant",
             content=ans,
             citations=[c.model_dump() for c in citations_list],
-            retrieval_metadata={"result_count": result_count},
+            retrieval_metadata=retrieval_meta.model_dump(),
         )
         db.add_all([user_msg, asst_msg])
         conversation.updated_at = datetime.now(timezone.utc)
@@ -112,7 +121,7 @@ async def query_rag(
         return ChatQueryResponse(
             answer=ans,
             citations=citations_list,
-            retrieval=RetrievalMeta(result_count=result_count),
+            retrieval=retrieval_meta,
             conversation_id=conversation.id,
             request_id=request_id,
         )
@@ -122,7 +131,6 @@ async def query_rag(
     filter_doc_ids: list[str] | None = None
 
     if document_ids:
-        # Validate specifically requested document IDs
         unique_requested_ids = list(dict.fromkeys(document_ids))
         res = await db.execute(
             select(Document).where(
@@ -144,7 +152,6 @@ async def query_rag(
 
         filter_doc_ids = unique_requested_ids
     else:
-        # Query across all ready documents owned by user
         res = await db.execute(
             select(Document).where(
                 Document.owner_id == user_id,
@@ -153,22 +160,30 @@ async def query_rag(
         )
         ready_docs = list(res.scalars().all())
         if not ready_docs:
-            # User has no ready documents to search
             return await _persist_and_respond(
                 ans=ABSTENTION_MESSAGE,
                 citations_list=[],
-                result_count=0,
+                retrieval_meta=RetrievalMeta(
+                    result_count=0,
+                    retrieval_strategy="none",
+                    dense_count=0,
+                    lexical_count=0,
+                    reranked=False,
+                ),
             )
 
         for doc in ready_docs:
             doc_filename_map[doc.id] = doc.original_filename
         filter_doc_ids = list(doc_filename_map.keys())
 
-    # 2. Embed question
-    query_vector = await embedding_provider.embed_query(question)
+    # 2. Query reformulation (for conversational coreferences)
+    search_query = question
+    if cfg.query_reformulation_enabled and history_messages:
+        search_query = QueryReformulator.reformulate(question, history_messages)
 
-    # 3. Retrieve chunks from vector store
-    results = await vector_store.query_similarity(
+    # 3. Dense vector retrieval
+    query_vector = await embedding_provider.embed_query(search_query)
+    dense_results = await vector_store.query_similarity(
         query_vector=query_vector,
         owner_id=user_id,
         document_ids=filter_doc_ids,
@@ -176,21 +191,65 @@ async def query_rag(
         score_threshold=cfg.similarity_threshold,
     )
 
-    # 4. Abstention check: if no chunks or none meet threshold
+    # 4. Sparse lexical BM25 retrieval and Reciprocal Rank Fusion
+    retrieval_strategy = "vector"
+    lexical_results: list[VectorSearchResult] = []
+    results: list[VectorSearchResult]
+
+    if cfg.hybrid_search_enabled:
+        retrieval_strategy = "hybrid"
+        bm25_engine = BM25Retriever()
+        lexical_results = await bm25_engine.search(
+            db=db,
+            query=search_query,
+            owner_id=user_id,
+            document_ids=filter_doc_ids,
+            top_k=cfg.top_k,
+        )
+
+        results = reciprocal_rank_fusion(
+            dense_results=dense_results,
+            lexical_results=lexical_results,
+            k=cfg.hybrid_rrf_k,
+            top_k=cfg.top_k,
+        )
+    else:
+        results = dense_results
+
+    # 5. Pluggable reranking
+    reranked_flag = False
+    if reranker is not None and results:
+        results = await reranker.rerank(
+            query=search_query,
+            candidates=results,
+            top_k=cfg.top_k,
+        )
+        reranked_flag = True
+
+    retrieval_meta = RetrievalMeta(
+        result_count=len(results),
+        retrieval_strategy=retrieval_strategy,
+        dense_count=len(dense_results),
+        lexical_count=len(lexical_results),
+        reranked=reranked_flag,
+    )
+
+    # 6. Abstention check
     if should_abstain(results, cfg.similarity_threshold):
         logger.info(
-            "Abstaining on query: user=%s result_count=%d threshold=%.2f",
+            "Abstaining on query: user=%s result_count=%d threshold=%.2f strategy=%s",
             user_id,
             len(results),
             cfg.similarity_threshold,
+            retrieval_strategy,
         )
         return await _persist_and_respond(
             ans=ABSTENTION_MESSAGE,
             citations_list=[],
-            result_count=len(results),
+            retrieval_meta=retrieval_meta,
         )
 
-    # 5. Build prompt with source IDs and conversation context
+    # 7. Build prompt with source IDs and conversation context
     chunks_with_filenames = [(r, doc_filename_map.get(r.document_id, "document")) for r in results]
     evidence = PromptBuilder.build_evidence(chunks_with_filenames)
     system_prompt = PromptBuilder.get_system_prompt()
@@ -200,13 +259,13 @@ async def query_rag(
         conversation_history=history_messages if history_messages else None,
     )
 
-    # 6. Generate answer with LLM
+    # 8. Generate answer with LLM
     raw_answer = await llm_provider.generate(
         prompt=user_prompt,
         system_prompt=system_prompt,
     )
 
-    # 7. Validate citations
+    # 9. Validate citations
     if ABSTENTION_MESSAGE in raw_answer:
         validated_citations: list[CitationItem] = []
     else:
@@ -216,16 +275,16 @@ async def query_rag(
         )
 
     logger.info(
-        "RAG query completed: user=%s chunks=%d citations=%d conversation=%s",
+        "RAG query completed: user=%s chunks=%d citations=%d strategy=%s",
         user_id,
         len(results),
         len(validated_citations),
-        conversation.id,
+        retrieval_strategy,
     )
 
-    # 8. Persist and return response
+    # 10. Persist and return response
     return await _persist_and_respond(
         ans=raw_answer,
         citations_list=validated_citations,
-        result_count=len(results),
+        retrieval_meta=retrieval_meta,
     )

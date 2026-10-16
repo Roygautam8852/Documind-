@@ -14,8 +14,8 @@ Upload PDFs, Word documents, and plain-text files, then ask questions and receiv
 - 📌 **Transparent citations** — Every answer links to the original source passage and page
 - 💬 **Conversation history** — Persistent, user-isolated conversation threads
 - 📊 **RAG evaluation** — Built-in evaluation tooling for retrieval quality
-- 🔐 **Privacy-first** — User data is isolated; documents are never used for training
-- 🐳 **Docker-ready** — Full Compose setup for local and production deployment
+- 🔐 **Account isolation** — Documents and conversations are scoped to the authenticated user
+- 🐳 **Docker-ready** — Compose configurations for local development and single-host production
 
 ---
 
@@ -37,7 +37,7 @@ Upload PDFs, Word documents, and plain-text files, then ask questions and receiv
 ### Prerequisites
 
 - Docker and Docker Compose
-- Node.js 20+ (for frontend development)
+- Node.js 24+ (for frontend development)
 - Python 3.11+ (for backend development)
 
 ### 1. Clone and configure
@@ -54,6 +54,8 @@ cp .env.example .env
 ```bash
 docker compose up --build
 ```
+
+This starts the local development setup. For a single-host production deployment, configure strong secrets and a real LLM provider in `.env`, set `FRONTEND_ORIGIN` to the public site origin, then use `docker compose -f docker-compose.prod.yml up --build -d`. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for limitations and operational requirements.
 
 The application will be available at:
 - **Frontend:** http://localhost:5173
@@ -126,7 +128,7 @@ Full documentation is in the [docs/](docs/) directory. Start with [docs/INDEX.md
 
 This project is under active development. See [docs/phases/](docs/phases/) for the phase-wise implementation plan.
 
-Current status: **Phase 04 — Citations & History** ✅
+Current status: **Phase 09 — Polish & Release** ✅
 
 ---
 

@@ -12,7 +12,9 @@ operate on their own documents (owner_id == current_user_id).
 
 from __future__ import annotations
 
+import io
 import logging
+import zipfile
 
 from fastapi import APIRouter, UploadFile, status
 from sqlalchemy import func, select
@@ -24,6 +26,7 @@ from app.core.exceptions import (
     FileTooLargeError,
     MalformedFileError,
     NotFoundError,
+    StorageQuotaExceededError,
     UnsupportedFileTypeError,
 )
 from app.models.document import Document
@@ -79,8 +82,18 @@ async def upload_document(
             message=f"File type '.{extension}' is not supported. Allowed: {allowed}"
         )
 
-    # 2. Read body with size guard
-    content = await file.read()
+    # Check per-user count before accepting the upload, then read at most limit + 1 bytes.
+    doc_count, used_bytes = (
+        await db.execute(
+            select(func.count(Document.id), func.coalesce(func.sum(Document.size_bytes), 0)).where(
+                Document.owner_id == current_user_id
+            )
+        )
+    ).one()
+    if doc_count >= settings.max_user_documents:
+        raise StorageQuotaExceededError()
+
+    content = await file.read(settings.max_upload_bytes + 1)
     if len(content) > settings.max_upload_bytes:
         size_mb = len(content) / 1_048_576
         msg = f"File exceeds the {settings.max_upload_mb} MB limit ({size_mb:.1f} MB uploaded)."
@@ -88,7 +101,15 @@ async def upload_document(
     if len(content) == 0:
         raise MalformedFileError(message="Uploaded file is empty.")
 
-    # 3. Determine MIME type from extension (trust extension for now; magic bytes in Phase 08)
+    storage_limit = settings.max_user_storage_mb * 1024 * 1024
+    if used_bytes + len(content) > storage_limit:
+        raise StorageQuotaExceededError(
+            message="This upload would exceed your document storage quota. Delete a document before uploading."
+        )
+
+    _validate_file_content(extension, content)
+
+    # MIME type is assigned only after validating the corresponding file signature.
     mime_type = _MIME_TYPES.get(extension, "application/octet-stream")
 
     # 4. Compute checksum
@@ -123,10 +144,9 @@ async def upload_document(
     await db.flush()
 
     logger.info(
-        "Document uploaded: id=%s owner=%s filename=%r size=%d",
+        "Document uploaded: id=%s owner=%s size=%d",
         doc.id,
         current_user_id,
-        original_filename,
         len(content),
     )
 
@@ -139,6 +159,28 @@ async def upload_document(
         status="uploaded",
         size_bytes=len(content),
     )
+
+
+def _validate_file_content(extension: str, content: bytes) -> None:
+    """Reject extension spoofing and malformed container files before storage."""
+    if extension == "pdf":
+        valid = content.startswith(b"%PDF-")
+    elif extension == "docx":
+        try:
+            with zipfile.ZipFile(io.BytesIO(content)) as archive:
+                names = set(archive.namelist())
+                valid = "[Content_Types].xml" in names and "word/document.xml" in names
+        except (zipfile.BadZipFile, OSError):
+            valid = False
+    else:
+        try:
+            content.decode("utf-8")
+            valid = True
+        except UnicodeDecodeError:
+            valid = False
+
+    if not valid:
+        raise MalformedFileError(message="The uploaded file content does not match its file type.")
 
 
 @router.get(

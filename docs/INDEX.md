@@ -26,11 +26,10 @@ Welcome to the DocuMind documentation. This index provides navigation to all pro
 
 | Document | Description |
 |---|---|
-| [RAG_DESIGN](RAG_DESIGN.md) | End-to-end RAG pipeline design |
-| [DOCUMENT_INGESTION](DOCUMENT_INGESTION.md) | Document parsing, validation, and storage |
-| [RETRIEVAL_STRATEGY](RETRIEVAL_STRATEGY.md) | Embeddings, vector search, and hybrid retrieval |
-| [PROMPT_ENGINEERING](PROMPT_ENGINEERING.md) | Prompt design, context handling, injection defenses |
-| [RAG_EVALUATION](RAG_EVALUATION.md) | Evaluation datasets, metrics, and baselines |
+| [Document ingestion phase](phases/PHASE_01_DOCUMENT_INGESTION.md) | Document parsing, validation, and storage |
+| [RAG_DESIGN](RAG_DESIGN.md) | Retrieval, prompt construction, and injection defenses |
+| [RAG system prompt](../prompts/RAG_SYSTEM_PROMPT.md) | Current grounding and safety instructions |
+| [RAG evaluation](../evaluation/README.md) | Evaluation datasets and metrics |
 
 ## Security and Privacy
 
@@ -46,7 +45,7 @@ Welcome to the DocuMind documentation. This index provides navigation to all pro
 | [DEPLOYMENT](DEPLOYMENT.md) | Docker, environment setup, and deployment |
 | [ENVIRONMENT_VARIABLES](ENVIRONMENT_VARIABLES.md) | All configuration variables |
 | [DATABASE_MIGRATIONS](DATABASE_MIGRATIONS.md) | Migration workflow and setup |
-| [OBSERVABILITY](OBSERVABILITY.md) | Logging, metrics, and error tracking |
+| [Evaluation & observability](../evaluation/README.md#observability) | Logging, metrics, and error tracking |
 | [ERROR_HANDLING](ERROR_HANDLING.md) | Error conventions and recovery |
 
 ## Development Process

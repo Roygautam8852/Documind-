@@ -17,14 +17,18 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError as PydanticValidationError
 
+from app.api.dependencies import CurrentUserId
 from app.api.v1.router import api_router
 from app.core.config import Settings, get_settings
 from app.core.exceptions import DocuMindError
 from app.core.logging import configure_logging
+from app.core.metrics import HttpMetricsMiddleware, http_metrics
+from app.core.rate_limit import RateLimitMiddleware
 from app.core.request_context import RequestContextMiddleware, get_request_id
 
 # Module-level logger (configure_logging() is called inside create_app)
@@ -76,7 +80,9 @@ def create_app() -> FastAPI:
     # ── Middleware (applied in reverse order) ─────────────────────────────────
 
     # 1. Request context (UUID per request)
+    app.add_middleware(RateLimitMiddleware)
     app.add_middleware(RequestContextMiddleware)
+    app.add_middleware(HttpMetricsMiddleware)
 
     # 2. CORS
     app.add_middleware(
@@ -129,6 +135,29 @@ def create_app() -> FastAPI:
             },
         )
 
+    @app.exception_handler(RequestValidationError)
+    async def request_validation_handler(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        """Return validation locations without echoing submitted values."""
+        request_id = get_request_id(request)
+        safe_detail = [
+            {
+                "field": ".".join(str(loc) for loc in err.get("loc", ())),
+                "msg": err.get("msg", "Invalid value."),
+            }
+            for err in exc.errors()
+        ]
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error_code": "validation_error",
+                "message": "The request contains invalid data.",
+                "request_id": request_id,
+                "detail": safe_detail,
+            },
+        )
+
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
         request_id = get_request_id(request)
@@ -151,6 +180,11 @@ def create_app() -> FastAPI:
     # ── Routes ────────────────────────────────────────────────────────────────
 
     app.include_router(api_router, prefix="/api/v1")
+
+    @app.get("/metrics", tags=["observability"], summary="Request metrics snapshot")
+    async def metrics_snapshot(_current_user_id: CurrentUserId) -> dict[str, object]:
+        """Return process-local request counts and latency aggregates."""
+        return http_metrics.snapshot()
 
     return app
 

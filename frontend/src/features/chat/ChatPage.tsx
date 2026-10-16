@@ -10,6 +10,8 @@ import { ChatInput } from './components/ChatInput'
 import { DocumentSelector } from './components/DocumentSelector'
 import { SourceSnippetModal } from './components/SourceSnippetModal'
 import { ConversationSidebar } from './components/ConversationSidebar'
+import { AccountControl } from '@/features/auth/AccountControl'
+import { MobileNav } from '@/app/MobileNav'
 
 export function ChatPage() {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
@@ -97,6 +99,10 @@ export function ChatPage() {
         text: response.answer,
         citations: response.citations,
         retrievalCount: response.retrieval.result_count,
+        retrievalStrategy: response.retrieval.retrieval_strategy,
+        denseCount: response.retrieval.dense_count,
+        lexicalCount: response.retrieval.lexical_count,
+        reranked: response.retrieval.reranked,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       }
 
@@ -121,8 +127,9 @@ export function ChatPage() {
 
   return (
     <div className="min-h-screen bg-surface-50 text-slate-200">
+      <MobileNav />
       {/* ── App Navigation Sidebar ───────────────────────────────────── */}
-      <div className="fixed inset-y-0 left-0 w-56 bg-surface-100 border-r border-surface-300 flex flex-col z-20">
+      <div className="hidden md:flex fixed inset-y-0 left-0 w-56 bg-surface-100 border-r border-surface-300 flex-col z-20">
         <div className="flex items-center gap-2 px-4 h-16 border-b border-surface-300">
           <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center">
             <Brain className="w-4 h-4 text-white" />
@@ -155,17 +162,12 @@ export function ChatPage() {
         </nav>
 
         <div className="p-3 border-t border-surface-300">
-          <div className="flex items-center gap-2.5 px-3 py-2">
-            <div className="w-7 h-7 rounded-full bg-brand-500/20 flex items-center justify-center">
-              <span className="text-brand-300 text-xs font-bold">U</span>
-            </div>
-            <span className="text-sm text-slate-400 truncate">user@example.com</span>
-          </div>
+          <AccountControl />
         </div>
       </div>
 
       {/* ── Main Workspace ───────────────────────────────────────────── */}
-      <div className="pl-56 flex h-screen overflow-hidden">
+      <div className="pl-0 md:pl-56 flex h-[calc(100vh-3.5rem)] md:h-screen overflow-hidden">
         {/* Conversation History Sidebar */}
         <ConversationSidebar
           conversations={convData?.items || []}

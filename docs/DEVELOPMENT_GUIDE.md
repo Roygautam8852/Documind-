@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Python 3.11 or later
-- Node.js 20 or later
+- Node.js 24 or later
 - npm 10 or later
 - PostgreSQL 16 (or Docker for containerized development)
 - Git
@@ -133,6 +133,8 @@ npm run lint:fix
 ---
 
 ## Docker Compose (All Services)
+
+The root Compose file starts the hot-reload local development stack. For the static frontend and single-host production setup, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ```bash
 # Start everything

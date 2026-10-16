@@ -134,9 +134,9 @@ export function LandingPage() {
           <Shield className="w-6 h-6 text-brand-400 mx-auto mb-3" />
           <h3 className="font-semibold text-white mb-2">Your documents, your data</h3>
           <p className="text-sm text-slate-400 leading-relaxed">
-            Documents are processed and stored privately per account. Only the relevant
-            excerpts needed to answer your question are sent to the AI provider —
-            not your entire document. Your data is never used to train AI models.
+            Documents are stored privately per account. Relevant excerpts may be sent to
+            the AI provider configured by the service; review that provider's data
+            handling terms before uploading sensitive material.
           </p>
         </div>
       </section>
@@ -149,7 +149,8 @@ export function LandingPage() {
             <span>DocuMind — AI Document Intelligence</span>
           </div>
           <p className="text-xs text-slate-600">
-            Phase 00 — Foundation build. Full features coming in subsequent phases.
+            Upload, retrieval, chat, summaries, and citations are available. See the
+            documentation for setup and current service limitations.
           </p>
         </div>
       </footer>

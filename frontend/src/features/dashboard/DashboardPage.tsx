@@ -4,19 +4,22 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useDocuments } from '@/features/documents/api'
 import { UploadDropzone } from '@/features/documents/components/UploadDropzone'
 import { DocumentList } from '@/features/documents/components/DocumentList'
+import { AccountControl } from '@/features/auth/AccountControl'
+import { MobileNav } from '@/app/MobileNav'
 
 export function DashboardPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const navigate = useNavigate()
-  const { data, isLoading } = useDocuments(1, 5)
+  const { data, isLoading, isError } = useDocuments(1, 5)
 
-  const documentCount = isLoading ? '...' : String(data?.total ?? 0)
+  const documentCount = isLoading ? '...' : isError ? '—' : String(data?.total ?? 0)
   const hasDocuments = (data?.total ?? 0) > 0
 
   return (
     <div className="min-h-screen bg-surface-50 text-slate-200">
+      <MobileNav />
       {/* ── Sidebar ──────────────────────────────────────────────────── */}
-      <div className="fixed inset-y-0 left-0 w-64 bg-surface-100 border-r border-surface-300 flex flex-col z-20">
+      <div className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-surface-100 border-r border-surface-300 flex-col z-20">
         <div className="flex items-center gap-2 px-4 h-16 border-b border-surface-300">
           <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center">
             <Brain className="w-4 h-4 text-white" />
@@ -49,17 +52,12 @@ export function DashboardPage() {
         </nav>
 
         <div className="p-3 border-t border-surface-300">
-          <div className="flex items-center gap-2.5 px-3 py-2">
-            <div className="w-7 h-7 rounded-full bg-brand-500/20 flex items-center justify-center">
-              <span className="text-brand-300 text-xs font-bold">U</span>
-            </div>
-            <span className="text-sm text-slate-400 truncate">user@example.com</span>
-          </div>
+          <AccountControl />
         </div>
       </div>
 
       {/* ── Main content ─────────────────────────────────────────────── */}
-      <div className="ml-64 p-8">
+      <div className="ml-0 md:ml-64 p-4 sm:p-8">
         <div className="max-w-5xl mx-auto space-y-8">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -78,7 +76,7 @@ export function DashboardPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 max-w-sm">
             <Link to="/documents" className="card p-5 hover:border-brand-500/40 transition-colors">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm text-muted">Documents</span>
@@ -86,20 +84,6 @@ export function DashboardPage() {
               </div>
               <div className="text-2xl font-bold text-white">{documentCount}</div>
             </Link>
-            <div className="card p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-muted">Conversations</span>
-                <MessageSquare className="w-4 h-4 text-violet-400" />
-              </div>
-              <div className="text-2xl font-bold text-white">—</div>
-            </div>
-            <div className="card p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-muted">Questions asked</span>
-                <Brain className="w-4 h-4 text-emerald-400" />
-              </div>
-              <div className="text-2xl font-bold text-white">—</div>
-            </div>
           </div>
 
           {/* Upload Dropzone (Collapsible) */}

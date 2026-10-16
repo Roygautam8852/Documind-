@@ -74,24 +74,28 @@ def save_upload(
         tmp_path.unlink(missing_ok=True)
         raise
 
-    logger.debug("Saved upload: key=%s size=%d", key, len(content))
+    logger.debug("Saved upload: size=%d", len(content))
     return abs_path, key
 
 
 def resolve_path(object_key: str) -> Path:
     """Return the absolute filesystem path for a stored object key."""
-    return Path(get_settings().upload_dir) / object_key
+    root = Path(get_settings().upload_dir).resolve()
+    path = (root / object_key).resolve()
+    if not path.is_relative_to(root):
+        raise ValueError("Stored object key resolves outside the upload directory")
+    return path
 
 
 def delete_file(object_key: str) -> None:
     """Delete a stored file. Silently ignores missing files."""
-    path = resolve_path(object_key)
     try:
+        path = resolve_path(object_key)
         path.unlink(missing_ok=True)
         # Remove the document's directory if empty
         _try_rmdir(path.parent)
-    except OSError as exc:
-        logger.warning("Could not delete file %s: %s", object_key, exc)
+    except (OSError, ValueError) as exc:
+        logger.warning("Could not delete stored upload: %s", type(exc).__name__)
 
 
 def _try_rmdir(directory: Path) -> None:

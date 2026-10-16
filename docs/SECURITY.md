@@ -15,13 +15,13 @@ DocuMind processes user-uploaded documents and sends excerpts to an external LLM
 ## File Security
 
 - **Extension validation:** Only `pdf`, `docx`, and `txt` are accepted. Extension check is case-insensitive.
-- **MIME type validation:** Actual file content is inspected, not just the extension.
+- **File signature validation:** PDF signatures, DOCX ZIP structure, and UTF-8 text are checked before persistence; the extension alone is not trusted.
 - **Size limits:** Configurable `MAX_UPLOAD_MB` enforced before processing.
 - **Server-generated storage keys:** Uploaded files are stored with a UUID-based key, never the user-supplied filename.
 - **Out-of-webroot storage:** Upload directory is not served statically.
 - **Path traversal prevention:** Storage keys are generated server-side; user input never forms a filesystem path.
 - **Malformed file handling:** Parse failures are caught and mapped to safe error messages.
-- **Resource limits:** Parsing operations are time-bounded to prevent denial-of-service.
+- **Resource limits:** Upload reads are capped at the configured maximum plus one byte; account document-count and total-byte quotas are enforced. Parsing operations still need deployment-level CPU and memory limits.
 
 ---
 
@@ -31,6 +31,7 @@ DocuMind processes user-uploaded documents and sends excerpts to an external LLM
 - Passwords are hashed with `bcrypt` (cost factor ≥ 12).
 - JWT secrets must be long, random, and environment-variable-managed.
 - Access tokens expire (configurable via `ACCESS_TOKEN_EXPIRE_MINUTES`).
+- Production startup rejects JWT secrets shorter than 64 characters and known development placeholders.
 - `Authorization: Bearer <token>` header is required for all protected endpoints.
 
 ---
@@ -67,6 +68,7 @@ Document content is treated as **untrusted input**:
 - `LLM_API_KEY` and `JWT_SECRET` are never logged or included in API responses.
 - Frontend environment variables must **never** contain server-side secrets.
 - Logs are checked for redaction of sensitive fields.
+- Request validation responses omit submitted values; upload filenames are not written to application logs.
 
 ---
 
@@ -87,10 +89,11 @@ Document content is treated as **untrusted input**:
 
 ---
 
-## Known Limitations (Phase 00)
+## Known Limitations
 
-- No rate limiting implemented yet (planned for Phase 08).
+- Built-in rate limits are process-local and keyed by client IP. Multi-replica deployments must enforce shared limits at the trusted reverse proxy or use a shared rate-limit store. Do not trust client-supplied forwarded IP headers unless a trusted proxy configures them.
 - No malware scanning on uploads (documented limitation).
-- No upload quota per user (planned for Phase 08).
-- Authentication is implemented but not production-hardened in early phases.
+- Account upload quotas are configured by `MAX_USER_DOCUMENTS` and `MAX_USER_STORAGE_MB`; simultaneous uploads can race without a shared transactional quota reservation.
+- Local filesystem storage and embedded Chroma are suitable only for small deployments; production deployments need durable shared storage and a managed vector service.
+- Malware scanning, reverse-proxy TLS/security headers, backups, secret rotation, and an external audit trail remain deployment responsibilities.
 - See [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) for current status.

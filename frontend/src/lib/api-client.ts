@@ -95,6 +95,12 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     } catch {
       // Use defaults
     }
+    if (response.status === 401) {
+      setAccessToken(null)
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('documind:unauthorized'))
+      }
+    }
     throw new ApiRequestError({ ...errorData, status: response.status } as ApiError)
   }
 

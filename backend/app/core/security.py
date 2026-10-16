@@ -58,6 +58,9 @@ def create_access_token(
         "type": "access",
     }
     if extra_claims:
+        reserved = {"sub", "iat", "exp", "type"}.intersection(extra_claims)
+        if reserved:
+            raise ValueError(f"Additional token claims cannot override reserved fields: {sorted(reserved)}")
         payload.update(extra_claims)
 
     return jwt.encode(payload, settings.jwt_secret, algorithm=_ALGORITHM)

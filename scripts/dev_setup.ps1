@@ -17,7 +17,7 @@ $pyVersion = python --version 2>&1
 Write-Host "  Python: $pyVersion" -ForegroundColor Green
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Error "Node.js 20+ is required. Install from https://nodejs.org"
+    Write-Error "Node.js 24+ is required. Install from https://nodejs.org"
     exit 1
 }
 

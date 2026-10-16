@@ -13,7 +13,9 @@ cd backend
 alembic upgrade head
 ```
 
-This applies all existing migrations to the target database.
+This applies all existing migrations, including the initial relational schema, to the target database.
+
+For a database that already has DocuMind tables but no `alembic_version` record, do not run the baseline blindly: back up the database, compare its schema to the baseline, and only if it matches exactly, record the baseline with `alembic stamp 20261016_0001`. Existing production data needs a reviewed adoption plan.
 
 ### 2. Creating a New Migration
 
@@ -61,14 +63,14 @@ Use clear, descriptive messages that describe the schema change.
 1. **Never** edit a migration that has already been applied to any shared database.
 2. **Always** test the migration `upgrade` and `downgrade` paths locally.
 3. **Data migrations** must be written manually — `autogenerate` only handles structural changes.
-4. **Production migrations** must be run as a separate step before deploying new application code.
+4. **Production migrations** should be applied as a controlled deployment step before new application code. The supplied single-host production Compose startup runs migrations before starting the API; use a dedicated migration job for orchestrated deployments.
 5. **Foreign keys** are enforced at the database level; never disable them to work around constraint errors.
 
 ---
 
 ## Test Database
 
-For tests, the test database is created fresh using the migration baseline. The `conftest.py` applies migrations at the start of the test session.
+The repository includes a baseline migration at `alembic/versions/20261016_0001_initial_schema.py`. Apply it to new development and production databases with `alembic upgrade head`. Unit and integration tests create their isolated in-memory SQLite schema directly from SQLAlchemy metadata; they do not mutate the configured PostgreSQL database.
 
 Configure the test database URL via the `DATABASE_URL` environment variable when `APP_ENV=test`.
 

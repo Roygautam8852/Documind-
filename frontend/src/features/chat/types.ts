@@ -5,10 +5,15 @@ export interface Citation {
   page_number: number | null
   chunk_id: string
   snippet: string
+  score?: number
 }
 
 export interface RetrievalMeta {
   result_count: number
+  retrieval_strategy?: string
+  dense_count?: number
+  lexical_count?: number
+  reranked?: boolean
 }
 
 export interface ChatQueryRequest {
@@ -31,6 +36,10 @@ export interface ChatMessage {
   text: string
   citations?: Citation[]
   retrievalCount?: number
+  retrievalStrategy?: string
+  denseCount?: number
+  lexicalCount?: number
+  reranked?: boolean
   timestamp: string
   isError?: boolean
 }

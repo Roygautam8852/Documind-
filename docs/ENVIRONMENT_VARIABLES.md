@@ -21,6 +21,7 @@ All environment variables used by DocuMind are documented here. Copy `.env.examp
 | Variable | Required | Default | Description |
 |---|---|---|---|
 | `DATABASE_URL` | **Yes** | — | PostgreSQL async connection string, e.g. `postgresql+asyncpg://user:pass@host:5432/db` |
+| `POSTGRES_PASSWORD` | Compose production | — | URL-safe password for the PostgreSQL container; use a unique secret and keep `.env` untracked |
 
 ## File Storage
 
@@ -30,6 +31,8 @@ All environment variables used by DocuMind are documented here. Copy `.env.examp
 | `UPLOAD_DIR` | No | `./data/uploads` | Directory for uploaded files (local backend) |
 | `MAX_UPLOAD_MB` | No | `50` | Maximum allowed upload size in megabytes |
 | `ALLOWED_EXTENSIONS` | No | `pdf,docx,txt` | Comma-separated list of accepted extensions |
+| `MAX_USER_DOCUMENTS` | No | `100` | Maximum number of documents per account |
+| `MAX_USER_STORAGE_MB` | No | `1024` | Maximum total uploaded document size per account |
 
 ## Vector Store
 
@@ -73,6 +76,15 @@ All environment variables used by DocuMind are documented here. Copy `.env.examp
 | `JWT_SECRET` | **Yes** | — | Secret key for signing JWTs. Must be long and random in production. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | No | `60` | JWT token lifetime in minutes |
 
+## Abuse Controls
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `RATE_LIMIT_ENABLED` | No | `true` | Enable process-local request limits (automatically bypassed in tests) |
+| `AUTH_RATE_LIMIT_PER_MINUTE` | No | `10` | Login and registration requests per client IP per minute |
+| `UPLOAD_RATE_LIMIT_PER_MINUTE` | No | `10` | Upload requests per client IP per minute |
+| `API_RATE_LIMIT_PER_MINUTE` | No | `60` | Chat, summary, and comparison requests per client IP per minute |
+
 > **Warning:** `JWT_SECRET` must be changed from any default value before production deployment.
 
 ## Logging
@@ -93,4 +105,7 @@ Before going to production, ensure:
 - `APP_ENV=production` is set.
 - `ALLOWED_EXTENSIONS` matches your actual document policy.
 - `MAX_UPLOAD_MB` matches your infrastructure limits.
+- Rate limits are coordinated at the reverse proxy or shared store when running multiple backend replicas (the built-in limiter is process-local).
+- PostgreSQL and application credentials are unique, restricted, and supplied through a secret manager.
+- The configured LLM provider's data retention and processing terms are disclosed to users.
 - No `.env` file is committed to version control.

@@ -45,6 +45,60 @@ class MockLLMProvider(BaseLLMProvider):
         # Generate a coherent grounded answer citing available sources
         primary_source = sources[0]
         secondary_source = sources[1] if len(sources) > 1 else primary_source
+        prompt_lower = prompt.lower()
+
+        if "compare" in prompt_lower or "comparison" in prompt_lower:
+            return (
+                f"### Cross-Document Comparison\n\n"
+                f"Both documents address key domain standards [{primary_source}].\n\n"
+                f"### Key Similarities\n\n"
+                f"- Both documents establish standard protocols [{primary_source}].\n\n"
+                f"### Key Differences\n\n"
+                f"- The initial documentation outlines primary architecture [{primary_source}], "
+                f"whereas subsequent material focuses on guidelines [{secondary_source}]."
+            )
+
+        if "summar" in prompt_lower:
+            if "executive" in prompt_lower:
+                return (
+                    f"### Executive Summary\n\n"
+                    f"This document provides verified technical specifications "
+                    f"and operational standards [{primary_source}].\n\n"
+                    f"### Key Highlights\n\n"
+                    f"- Primary criteria and foundational definitions are established "
+                    f"in [{primary_source}].\n"
+                    f"- Implementation procedures and requirements are detailed "
+                    f"in [{secondary_source}]."
+                )
+            if "detailed" in prompt_lower:
+                return (
+                    f"### Detailed Breakdown\n\n"
+                    f"#### Section 1: Overview\n"
+                    f"The document introduces foundational principles and "
+                    f"operational scopes [{primary_source}].\n\n"
+                    f"#### Section 2: Specifications\n"
+                    f"Technical requirements and execution standards are documented "
+                    f"in detail [{secondary_source}]."
+                )
+            if "bullet" in prompt_lower:
+                return (
+                    f"### Key Takeaways\n\n"
+                    f"- Core requirements and operational guidelines are established "
+                    f"in [{primary_source}].\n"
+                    f"- System configurations and procedural details are elaborated "
+                    f"in [{secondary_source}]."
+                )
+            return (
+                f"### Executive Summary\n\n"
+                f"This document provides verified technical specifications "
+                f"and operational standards [{primary_source}].\n\n"
+                f"### Key Highlights\n\n"
+                f"- Primary criteria and foundational definitions are established "
+                f"in [{primary_source}].\n"
+                f"- Implementation procedures and requirements are detailed "
+                f"in [{secondary_source}]."
+            )
+
         return (
             f"Based on the provided documentation, the requested information is verified "
             f"directly in the source material [{primary_source}]. "

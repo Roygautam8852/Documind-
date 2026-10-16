@@ -4,6 +4,8 @@ import { Brain, BookOpen, FileText, MessageSquare, Upload } from 'lucide-react'
 import { UploadDropzone } from './components/UploadDropzone'
 import { DocumentList } from './components/DocumentList'
 import { useDocuments } from './api'
+import { AccountControl } from '@/features/auth/AccountControl'
+import { MobileNav } from '@/app/MobileNav'
 
 export function DocumentsPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false)
@@ -19,8 +21,9 @@ export function DocumentsPage() {
 
   return (
     <div className="min-h-screen bg-surface-50 text-slate-200">
+      <MobileNav />
       {/* ── Sidebar ──────────────────────────────────────────────────── */}
-      <div className="fixed inset-y-0 left-0 w-64 bg-surface-100 border-r border-surface-300 flex flex-col z-20">
+      <div className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-surface-100 border-r border-surface-300 flex-col z-20">
         <div className="flex items-center gap-2 px-4 h-16 border-b border-surface-300">
           <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center">
             <Brain className="w-4 h-4 text-white" />
@@ -53,17 +56,12 @@ export function DocumentsPage() {
         </nav>
 
         <div className="p-3 border-t border-surface-300">
-          <div className="flex items-center gap-2.5 px-3 py-2">
-            <div className="w-7 h-7 rounded-full bg-brand-500/20 flex items-center justify-center">
-              <span className="text-brand-300 text-xs font-bold">U</span>
-            </div>
-            <span className="text-sm text-slate-400 truncate">user@example.com</span>
-          </div>
+          <AccountControl />
         </div>
       </div>
 
       {/* ── Main content ─────────────────────────────────────────────── */}
-      <div className="ml-64 p-8">
+      <div className="ml-0 md:ml-64 p-4 sm:p-8">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

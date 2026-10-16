@@ -81,9 +81,17 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
       <div className="flex-1 space-y-2.5 overflow-hidden">
         {/* Header row */}
         <div className="flex items-center justify-between text-xs text-slate-400">
-          <span className="font-semibold text-slate-200">
-            {isUser ? 'You' : 'DocuMind'}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-slate-200">
+              {isUser ? 'You' : 'DocuMind'}
+            </span>
+            {!isUser && message.retrievalStrategy && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-200/80 text-brand-300 border border-surface-300 font-mono">
+                {message.retrievalStrategy === 'hybrid' ? 'Hybrid Search' : 'Vector Search'}
+                {message.reranked ? ' • Reranked' : ''}
+              </span>
+            )}
+          </div>
           <span>{message.timestamp}</span>
         </div>
 

@@ -48,6 +48,8 @@ Component tests using Vitest + React Testing Library.
 
 ## Running Tests
 
+The current CI runs backend lint/tests and frontend lint/component tests/build. Browser-level Playwright E2E coverage is not included yet; use the manual full-flow checklist in [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) before a release.
+
 ### Backend
 ```bash
 cd backend

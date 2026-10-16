@@ -24,6 +24,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: documind_backend
+    user: "0:0" # Local bind mounts may be owned by the host user; production runs as the image's unprivileged user.
     restart: unless-stopped
     depends_on:
       postgres:
@@ -37,12 +38,13 @@ services:
     volumes:
       - ./data:/app/data
       - ./backend:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: builder
     container_name: documind_frontend
     restart: unless-stopped
     depends_on:
@@ -51,6 +53,7 @@ services:
       - "5173:5173"
     volumes:
       - ./frontend/src:/app/src
+    command: npm run dev -- --host 0.0.0.0
     environment:
       VITE_API_URL: http://localhost:8000
 

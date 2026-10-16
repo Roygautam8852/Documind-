@@ -56,7 +56,7 @@ LLM providers are accessed through an abstract interface to avoid vendor lock-in
 | Pytest | Backend testing |
 | Vitest | Fast frontend unit tests |
 | React Testing Library | Component testing aligned with user behavior |
-| Playwright | E2E browser automation (Phase 09) |
+| Playwright | Candidate for future browser-based end-to-end coverage; not currently installed |
 
 ## Version Constraints
 

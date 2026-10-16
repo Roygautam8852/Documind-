@@ -117,3 +117,14 @@ async def test_error_response_never_exposes_internals(client: AsyncClient) -> No
     assert "Traceback" not in text
     assert "/app/" not in text
     assert "sqlalchemy" not in text.lower()
+
+
+@pytest.mark.asyncio
+async def test_validation_response_does_not_echo_submitted_password(client: AsyncClient) -> None:
+    secret = "short-secret-value"
+    response = await client.post(
+        "/api/v1/auth/register",
+        json={"email": "invalid@example.com", "password": secret},
+    )
+    assert response.status_code == 422
+    assert secret not in response.text

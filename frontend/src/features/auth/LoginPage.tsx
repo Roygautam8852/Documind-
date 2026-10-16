@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -15,6 +15,7 @@ type FormData = z.infer<typeof schema>
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -29,7 +30,8 @@ export function LoginPage() {
     try {
       const res = await apiClient.post<{ access_token: string }>('/auth/login', data)
       setAccessToken(res.access_token)
-      navigate('/dashboard')
+      const returnTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
+      navigate(returnTo || '/dashboard', { replace: true })
     } catch (err: unknown) {
       const msg = (err as { message?: string })?.message ?? 'Login failed. Please try again.'
       setServerError(msg)

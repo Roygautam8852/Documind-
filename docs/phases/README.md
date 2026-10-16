@@ -9,8 +9,8 @@ DocuMind is built in sequential phases. Each phase has defined acceptance criter
 | [02](PHASE_02_CHUNKING_EMBEDDINGS.md) | Chunking & Embeddings | ✅ Complete |
 | [03](PHASE_03_BASIC_RAG_CHAT.md) | Basic RAG Chat | ✅ Complete |
 | [04](PHASE_04_CITATIONS_AND_HISTORY.md) | Citations & History | ✅ Complete |
-| [05](PHASE_05_ADVANCED_RETRIEVAL.md) | Advanced Retrieval | ⏳ Pending |
-| [06](PHASE_06_SUMMARIES_AND_MULTI_DOC.md) | Summaries & Multi-Doc | ⏳ Pending |
-| [07](PHASE_07_EVALUATION_AND_OBSERVABILITY.md) | Evaluation & Observability | ⏳ Pending |
-| [08](PHASE_08_SECURITY_AND_PRODUCTION.md) | Security & Production | ⏳ Pending |
-| [09](PHASE_09_POLISH_AND_RELEASE.md) | Polish & Release | ⏳ Pending |
+| [05](PHASE_05_ADVANCED_RETRIEVAL.md) | Advanced Retrieval | ✅ Complete |
+| [06](PHASE_06_SUMMARIES_AND_MULTI_DOC.md) | Summaries & Multi-Doc | ✅ Complete |
+| [07](PHASE_07_EVALUATION_AND_OBSERVABILITY.md) | Evaluation & Observability | ✅ Complete |
+| [08](PHASE_08_SECURITY_AND_PRODUCTION.md) | Security & Production | ✅ Complete |
+| [09](PHASE_09_POLISH_AND_RELEASE.md) | Polish & Release | ✅ Complete |

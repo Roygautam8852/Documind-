@@ -34,6 +34,22 @@ class RetrievalMeta(BaseModel):
     """Metadata regarding retrieval execution."""
 
     result_count: int = Field(..., description="Number of evidence chunks retrieved")
+    retrieval_strategy: str = Field(
+        default="vector",
+        description="Retrieval strategy employed: 'vector' or 'hybrid'",
+    )
+    dense_count: int = Field(
+        default=0,
+        description="Number of candidates retrieved from dense vector search",
+    )
+    lexical_count: int = Field(
+        default=0,
+        description="Number of candidates retrieved from BM25 lexical search",
+    )
+    reranked: bool = Field(
+        default=False,
+        description="Whether cross-encoder or neural reranking was applied",
+    )
 
 
 class ChatQueryResponse(BaseModel):

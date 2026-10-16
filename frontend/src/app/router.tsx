@@ -6,6 +6,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { DocumentsPage } from '@/features/documents/DocumentsPage'
 import { ChatPage } from '@/features/chat/ChatPage'
 import { NotFoundPage } from '@/features/error/NotFoundPage'
+import { RequireAuth } from './RequireAuth'
 
 export const router = createBrowserRouter([
   {
@@ -22,15 +23,15 @@ export const router = createBrowserRouter([
   },
   {
     path: '/dashboard',
-    element: <DashboardPage />,
+    element: <RequireAuth><DashboardPage /></RequireAuth>,
   },
   {
     path: '/documents',
-    element: <DocumentsPage />,
+    element: <RequireAuth><DocumentsPage /></RequireAuth>,
   },
   {
     path: '/chat',
-    element: <ChatPage />,
+    element: <RequireAuth><ChatPage /></RequireAuth>,
   },
   {
     path: '/404',

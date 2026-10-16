@@ -12,10 +12,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Info,
+  Sparkles,
+  Layers,
 } from 'lucide-react'
 import { useDocuments, useDeleteDocument, useRetryDocument } from '../api'
 import { formatBytes } from '@/lib/formatters'
 import type { DocumentResponse, DocumentStatus } from '../types'
+import { SummaryModal } from '@/features/summaries/components/SummaryModal'
+import { DocumentComparisonModal } from '@/features/summaries/components/DocumentComparisonModal'
 
 interface DocumentListProps {
   onOpenUpload?: () => void
@@ -83,6 +87,9 @@ export function DocumentList({ onOpenUpload }: DocumentListProps) {
 
   const [documentToDelete, setDocumentToDelete] = useState<DocumentResponse | null>(null)
   const [activeErrorDetail, setActiveErrorDetail] = useState<string | null>(null)
+  const [documentToSummarize, setDocumentToSummarize] = useState<DocumentResponse | null>(null)
+  const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set())
+  const [isComparisonOpen, setIsComparisonOpen] = useState(false)
 
   const handleDelete = async () => {
     if (!documentToDelete) return
@@ -146,14 +153,78 @@ export function DocumentList({ onOpenUpload }: DocumentListProps) {
     )
   }
 
+  const readyDocs = documents.filter((d) => d.status === 'ready')
+  const allReadySelected =
+    readyDocs.length > 0 && readyDocs.every((d) => selectedDocIds.has(d.id))
+
+  const handleToggleSelectAll = () => {
+    if (allReadySelected) {
+      setSelectedDocIds(new Set())
+    } else {
+      setSelectedDocIds(new Set(readyDocs.map((d) => d.id)))
+    }
+  }
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedDocIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  const selectedDocsList = documents.filter((d) => selectedDocIds.has(d.id))
+
   return (
     <div className="space-y-4">
+      {/* Comparison Action Bar */}
+      {selectedDocIds.size >= 2 && (
+        <div className="flex items-center justify-between p-3 rounded-xl bg-brand-500/10 border border-brand-500/30 text-xs animate-fade-in">
+          <div className="flex items-center gap-2 text-brand-300 font-medium">
+            <Layers className="w-4 h-4 text-brand-400" />
+            <span>{selectedDocIds.size} documents selected for comparative analysis</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedDocIds(new Set())}
+              className="px-2.5 py-1 text-slate-400 hover:text-white transition-colors"
+            >
+              Clear selection
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsComparisonOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white font-medium shadow-sm transition-colors"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              Compare Documents ({selectedDocIds.size})
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Document Table */}
       <div className="card overflow-hidden border border-surface-300">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse" data-testid="documents-table">
             <thead>
               <tr className="border-b border-surface-300 bg-surface-100/40 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <th className="py-3 px-3 w-8">
+                  <input
+                    type="checkbox"
+                    checked={allReadySelected}
+                    onChange={handleToggleSelectAll}
+                    disabled={readyDocs.length === 0}
+                    className="rounded bg-surface-200 border-surface-300 text-brand-500 focus:ring-brand-500 cursor-pointer"
+                    title="Select all ready documents"
+                    aria-label="Select all ready documents"
+                  />
+                </th>
                 <th className="py-3 px-4">Document</th>
                 <th className="py-3 px-4">Size</th>
                 <th className="py-3 px-4">Pages</th>
@@ -165,6 +236,17 @@ export function DocumentList({ onOpenUpload }: DocumentListProps) {
             <tbody className="divide-y divide-surface-300 text-sm">
               {documents.map((doc) => (
                 <tr key={doc.id} className="hover:bg-surface-100/50 transition-colors">
+                  <td className="py-3 px-3 w-8">
+                    {doc.status === 'ready' && (
+                      <input
+                        type="checkbox"
+                        checked={selectedDocIds.has(doc.id)}
+                        onChange={() => handleToggleSelect(doc.id)}
+                        className="rounded bg-surface-200 border-surface-300 text-brand-500 focus:ring-brand-500 cursor-pointer"
+                        aria-label={`Select ${doc.original_filename}`}
+                      />
+                    )}
+                  </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-surface-200 flex items-center justify-center shrink-0">
@@ -220,6 +302,17 @@ export function DocumentList({ onOpenUpload }: DocumentListProps) {
                           <RotateCw
                             className={`w-4 h-4 ${retryMutation.isPending ? 'animate-spin' : ''}`}
                           />
+                        </button>
+                      )}
+                      {doc.status === 'ready' && (
+                        <button
+                          type="button"
+                          onClick={() => setDocumentToSummarize(doc)}
+                          className="p-1.5 text-brand-400 hover:text-brand-300 hover:bg-brand-500/10 rounded-lg transition-colors"
+                          title="Summarize document"
+                          aria-label={`Summarize ${doc.original_filename}`}
+                        >
+                          <Sparkles className="w-4 h-4" />
                         </button>
                       )}
                       <button
@@ -328,6 +421,20 @@ export function DocumentList({ onOpenUpload }: DocumentListProps) {
           </div>
         </div>
       )}
+
+      {/* Summary Modal */}
+      <SummaryModal
+        document={documentToSummarize}
+        isOpen={!!documentToSummarize}
+        onClose={() => setDocumentToSummarize(null)}
+      />
+
+      {/* Multi-Document Comparison Modal */}
+      <DocumentComparisonModal
+        documents={selectedDocsList}
+        isOpen={isComparisonOpen}
+        onClose={() => setIsComparisonOpen(false)}
+      />
     </div>
   )
 }
