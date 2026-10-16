@@ -1,0 +1,84 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+.eggs/
+dist/
+build/
+*.egg-info/
+*.egg
+
+# PyInstaller
+*.spec
+
+# Pytest
+.pytest_cache/
+.cache/
+
+# Coverage
+.coverage
+htmlcov/
+coverage.xml
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# Node
+node_modules/
+.npm/
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# Environment files — NEVER commit real secrets
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/settings.json
+.idea/
+*.iml
+
+# Data directories
+data/uploads/
+data/chroma/
+data/logs/
+
+# Alembic generated — keep versions but not local state
+backend/alembic/versions/*.pyc
+
+# Docker
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# Temporary
+tmp/
+temp/
+.tmp/

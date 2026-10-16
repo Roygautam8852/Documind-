@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Custom properties ──────────────────────────────────────────────────── */
+:root {
+  --color-bg: #17171c;
+  --color-card: #1e1e26;
+  --color-border: #2e2e3d;
+  --color-text: #e2e8f0;
+  --color-muted: #6b6b88;
+  --color-accent: #6366f1;
+  --color-accent-hover: #4f46e5;
+  --scrollbar-width: 6px;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-surface-50 text-slate-200 font-sans antialiased;
+  min-height: 100vh;
+}
+
+/* ── Custom scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-400 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-500;
+}
+
+/* ── Focus ring ──────────────────────────────────────────────────────────── */
+:focus-visible {
+  @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-surface-50;
+}
+
+/* ── Typography utilities ────────────────────────────────────────────────── */
+.heading-xl {
+  @apply text-3xl font-bold tracking-tight text-white;
+}
+
+.heading-lg {
+  @apply text-2xl font-semibold tracking-tight text-white;
+}
+
+.heading-md {
+  @apply text-xl font-semibold text-white;
+}
+
+.text-muted {
+  @apply text-surface-500;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────── */
+.card {
+  @apply bg-surface-100 border border-surface-300 rounded-xl;
+}
+
+.card-hover {
+  @apply card transition-all duration-200 hover:border-brand-500/40 hover:shadow-lg hover:shadow-brand-500/5;
+}
+
+/* ── Button variants ─────────────────────────────────────────────────────── */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+         font-medium text-sm transition-all duration-200 disabled:opacity-50
+         disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500;
+}
+
+.btn-primary {
+  @apply btn bg-brand-600 text-white hover:bg-brand-500 active:bg-brand-700
+         shadow-sm shadow-brand-500/20;
+}
+
+.btn-secondary {
+  @apply btn bg-surface-200 text-slate-200 hover:bg-surface-300 border border-surface-300;
+}
+
+.btn-ghost {
+  @apply btn text-slate-400 hover:bg-surface-200 hover:text-slate-200;
+}
+
+.btn-danger {
+  @apply btn bg-red-600/20 text-red-400 hover:bg-red-600/30 border border-red-500/30;
+}
+
+/* ── Input ───────────────────────────────────────────────────────────────── */
+.input {
+  @apply w-full bg-surface-200 border border-surface-300 text-slate-200
+         placeholder-surface-500 rounded-lg px-3 py-2 text-sm
+         transition-colors duration-200
+         focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent;
+}
+
+/* ── Badge ───────────────────────────────────────────────────────────────── */
+.badge {
+  @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-success {
+  @apply badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/25;
+}
+
+.badge-warning {
+  @apply badge bg-amber-500/15 text-amber-400 border border-amber-500/25;
+}
+
+.badge-error {
+  @apply badge bg-red-500/15 text-red-400 border border-red-500/25;
+}
+
+.badge-info {
+  @apply badge bg-blue-500/15 text-blue-400 border border-blue-500/25;
+}
+
+.badge-processing {
+  @apply badge bg-brand-500/15 text-brand-300 border border-brand-500/25;
+}
+
+/* ── Loading skeleton ────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    theme('colors.surface.100') 25%,
+    theme('colors.surface.200') 50%,
+    theme('colors.surface.100') 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  @apply rounded;
+}
+
+/* ── Gradient text ───────────────────────────────────────────────────────── */
+.gradient-text {
+  @apply bg-gradient-to-r from-brand-400 to-violet-400 bg-clip-text text-transparent;
+}
+
+/* ── Glassmorphism panel ─────────────────────────────────────────────────── */
+.glass {
+  @apply backdrop-blur-md bg-surface-100/80 border border-surface-300/50;
+}
+
+/* ── Prose override for AI answers ──────────────────────────────────────── */
+.prose-answer {
+  @apply prose prose-invert prose-sm max-w-none
+         prose-headings:text-white prose-headings:font-semibold
+         prose-p:text-slate-300 prose-p:leading-relaxed
+         prose-li:text-slate-300
+         prose-code:text-brand-300 prose-code:bg-surface-200 prose-code:px-1 prose-code:rounded
+         prose-pre:bg-surface-200 prose-pre:border prose-pre:border-surface-300;
+}
