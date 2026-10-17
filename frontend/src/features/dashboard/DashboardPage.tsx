@@ -1,174 +1,216 @@
 import { useState } from 'react'
-import { Brain, FileText, MessageSquare, Upload, BookOpen } from 'lucide-react'
+import {
+  Brain,
+  FileText,
+  MessageSquare,
+  Upload,
+  ArrowUpRight,
+  Layers,
+  ShieldCheck,
+} from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDocuments } from '@/features/documents/api'
 import { UploadDropzone } from '@/features/documents/components/UploadDropzone'
 import { DocumentList } from '@/features/documents/components/DocumentList'
-import { AccountControl } from '@/features/auth/AccountControl'
+import { EchoSidebar } from '@/app/EchoSidebar'
 import { MobileNav } from '@/app/MobileNav'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 
 export function DashboardPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const navigate = useNavigate()
   const { data, isLoading, isError } = useDocuments(1, 5)
 
-  const documentCount = isLoading ? '...' : isError ? '—' : String(data?.total ?? 0)
-  const hasDocuments = (data?.total ?? 0) > 0
+  const { data: userProfile } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: () => apiClient.get<{ id: string; email: string }>('/auth/me'),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+
+  const documentCount = isLoading ? '...' : isError ? '0' : String(data?.total ?? 0)
+  const userName = userProfile?.email ? userProfile.email.split('@')[0] : 'Olivia Brooks'
+  const displayName = userName.charAt(0).toUpperCase() + userName.slice(1)
 
   return (
-    <div className="min-h-screen bg-surface-50 text-slate-200">
-      <MobileNav />
-      {/* ── Sidebar ──────────────────────────────────────────────────── */}
-      <div className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-surface-100 border-r border-surface-300 flex-col z-20">
-        <div className="flex items-center gap-2 px-4 h-16 border-b border-surface-300">
-          <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center">
-            <Brain className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-white">DocuMind</span>
-        </div>
-
-        <nav className="flex-1 p-3 space-y-1">
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-brand-500/10 text-brand-300 text-sm font-medium"
-          >
-            <BookOpen className="w-4 h-4" />
-            Dashboard
-          </Link>
-          <Link
-            to="/documents"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-surface-200 text-sm font-medium transition-colors"
-          >
-            <FileText className="w-4 h-4" />
-            Documents
-          </Link>
-          <Link
-            to="/chat"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-surface-200 text-sm font-medium transition-colors"
-          >
-            <MessageSquare className="w-4 h-4" />
-            Chat
-          </Link>
-        </nav>
-
-        <div className="p-3 border-t border-surface-300">
-          <AccountControl />
-        </div>
+    <div className="flex h-screen bg-[#F4F5F7] overflow-hidden selection:bg-[#b6f526] selection:text-black">
+      {/* ── Desktop Echo Sidebar ───────────────────────────────────── */}
+      <div className="hidden md:flex flex-shrink-0 h-full">
+        <EchoSidebar onNewChat={() => navigate('/chat')} />
       </div>
 
-      {/* ── Main content ─────────────────────────────────────────────── */}
-      <div className="ml-0 md:ml-64 p-4 sm:p-8 bg-ambient min-h-screen">
-        <div className="max-w-5xl mx-auto space-y-8">
-          {/* Header Banner */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-900/40 via-surface-100/80 to-surface-100/90 border border-white/[0.08] p-6 sm:p-8 backdrop-blur-xl shadow-xl shadow-black/20">
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-              <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Gemini 3.8 Flash AI Engine Active
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  Welcome to <span className="gradient-text">DocuMind</span>
+      {/* ── Main Workspace ─────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <MobileNav />
+
+        {/* Top Header Bar */}
+        <header className="h-16 bg-white border-b border-gray-200/80 px-6 sm:px-8 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 font-bold text-gray-900 text-sm cursor-pointer hover:text-black">
+              <span>DocuMind 1.0</span>
+              <span className="text-xs text-gray-400">⌵</span>
+            </div>
+            <span className="text-gray-300">|</span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#b6f526]/20 border border-[#b6f526]/40 text-xs font-semibold text-[#3b6009]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#52840b] animate-pulse" />
+              Gemini 3.8 Flash Active
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsUploadOpen(!isUploadOpen)}
+              className="bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm shadow-[#b6f526]/20 flex items-center gap-1.5 active:scale-95"
+            >
+              <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>{isUploadOpen ? 'Close Upload' : 'Upload Document'}</span>
+            </button>
+            <Link
+              to="/chat"
+              className="bg-[#111215] hover:bg-[#1c1e24] text-white font-medium text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5 active:scale-95"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>New Query</span>
+            </Link>
+          </div>
+        </header>
+
+        {/* Scrollable Canvas */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8">
+          <div className="max-w-5xl mx-auto space-y-8">
+            {/* ── Hero Greeting Card ─────────────────────────────────── */}
+            <div className="bg-white rounded-[28px] p-6 sm:p-8 border border-gray-200/80 shadow-sm relative overflow-hidden">
+              <div className="relative z-10 space-y-2">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+                  Hello, {displayName}
                 </h1>
-                <p className="text-slate-300 text-sm max-w-lg leading-relaxed">
-                  Your document intelligence workspace. Upload documents, run semantic retrieval, and get answers with verifiable citations.
+                <p className="text-xl sm:text-2xl font-medium text-gray-500">
+                  Let's make your research easier.
+                </p>
+                <p className="text-xs text-gray-400">
+                  Your personal AI assistant for documents, research, and verified knowledge.
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsUploadOpen(!isUploadOpen)}
-                  className="btn-primary flex items-center gap-2 shadow-lg shadow-brand-500/25 px-5 py-2.5 rounded-xl font-medium"
-                  id="upload-button"
-                >
-                  <Upload className="w-4 h-4" />
-                  Upload document
-                </button>
-                <Link
-                  to="/chat"
-                  className="btn-secondary flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-200/80 hover:bg-surface-200 border border-white/[0.08] text-white"
-                >
-                  <MessageSquare className="w-4 h-4 text-brand-300" />
-                  Open Chat
-                </Link>
+              {/* Decorative subtle accent */}
+              <div className="absolute right-6 top-6 hidden sm:flex w-24 h-24 rounded-full bg-[#b6f526]/10 items-center justify-center pointer-events-none">
+                <Brain className="w-12 h-12 text-[#b6f526]" />
               </div>
             </div>
-          </div>
 
-          {/* Stats Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link to="/documents" className="card-premium p-5 group">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Documents</span>
-                <div className="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 group-hover:scale-110 transition-transform">
-                  <FileText className="w-4 h-4" />
+            {/* ── 3 Echo Prompt & Feature Cards (from image) ──────────── */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div
+                onClick={() => navigate('/chat')}
+                className="card-prompt group"
+              >
+                <div>
+                  <div className="icon-container-lime">
+                    <FileText className="w-5 h-5 text-black" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-black">
+                    Legal & Contract Insights
+                  </h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Ask questions across agreements, CVs, and technical specifications with exact citations.
+                  </p>
+                </div>
+                <div className="pt-4 flex items-center text-xs font-semibold text-gray-900 gap-1">
+                  <span>Start query</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 stroke-[2]" />
                 </div>
               </div>
-              <div className="text-3xl font-extrabold text-white">{documentCount}</div>
-              <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
-                <span>View library</span>
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
-              </p>
-            </Link>
 
-            <Link to="/chat" className="card-premium p-5 group">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">RAG Pipeline</span>
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                  <Brain className="w-4 h-4" />
+              <div
+                onClick={() => navigate('/documents')}
+                className="card-prompt group"
+              >
+                <div>
+                  <div className="icon-container-lime">
+                    <Layers className="w-5 h-5 text-black" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-black">
+                    Document Library ({documentCount})
+                  </h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Manage indexed files, monitor background chunking, and view vector embeddings.
+                  </p>
+                </div>
+                <div className="pt-4 flex items-center text-xs font-semibold text-gray-900 gap-1">
+                  <span>Manage files</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 stroke-[2]" />
                 </div>
               </div>
-              <div className="text-3xl font-extrabold text-emerald-400">Ready</div>
-              <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
-                <span>Hybrid Search + Citations</span>
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
-              </p>
-            </Link>
 
-            <Link to="/documents" className="card-premium p-5 group">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vector Store</span>
-                <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400 group-hover:scale-110 transition-transform">
-                  <BookOpen className="w-4 h-4" />
+              <div
+                onClick={() => navigate('/chat')}
+                className="card-prompt group"
+              >
+                <div>
+                  <div className="icon-container-lime">
+                    <ShieldCheck className="w-5 h-5 text-black" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-black">
+                    Verified Citations & Sources
+                  </h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Evidence over hallucinations. Inspect exact text passages and similarity ranking.
+                  </p>
+                </div>
+                <div className="pt-4 flex items-center text-xs font-semibold text-gray-900 gap-1">
+                  <span>Explore research</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 stroke-[2]" />
                 </div>
               </div>
-              <div className="text-3xl font-extrabold text-white">ChromaDB</div>
-              <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
-                <span>Persistent embeddings indexed</span>
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
-              </p>
-            </Link>
-          </div>
-
-          {/* Upload Dropzone (Collapsible) */}
-          {isUploadOpen && (
-            <div className="animate-fade-in">
-              <UploadDropzone
-                onClose={() => setIsUploadOpen(false)}
-                onUploadSuccess={() => {
-                  navigate('/documents')
-                }}
-              />
-            </div>
-          )}
-
-          {/* Documents Section */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="heading-md text-white text-lg font-bold">Document Library</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Manage and query your uploaded files</p>
-              </div>
-              {hasDocuments && (
-                <Link to="/documents" className="text-brand-400 hover:text-brand-300 text-sm font-medium transition-colors">
-                  View all documents →
-                </Link>
-              )}
             </div>
 
-            <DocumentList onOpenUpload={() => setIsUploadOpen(true)} />
+            {/* ── Upload Area (Toggleable) ───────────────────────────── */}
+            {isUploadOpen && (
+              <div className="bg-white rounded-[24px] p-6 border border-gray-200/90 shadow-sm animate-fade-in">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-[#b6f526] text-black flex items-center justify-center font-bold">
+                      <Upload className="w-4 h-4 text-black" />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-bold text-gray-900">Upload Knowledge Documents</h2>
+                      <p className="text-xs text-gray-500">PDF, DOCX, TXT up to 50MB</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsUploadOpen(false)}
+                    className="text-xs font-semibold text-gray-500 hover:text-gray-900 px-2 py-1 rounded-lg hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <UploadDropzone onUploadSuccess={() => setIsUploadOpen(false)} />
+              </div>
+            )}
+
+            {/* ── Document List Preview ──────────────────────────────── */}
+            <div className="bg-white rounded-[28px] p-6 sm:p-8 border border-gray-200/80 shadow-sm space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 tracking-tight">Recent Documents</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">Your indexed knowledge base files</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to="/documents"
+                    className="text-xs font-semibold text-gray-700 hover:text-black flex items-center gap-1 px-3 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
+                  >
+                    <span>View all documents</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+
+              <DocumentList />
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   )

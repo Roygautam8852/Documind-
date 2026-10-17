@@ -7,7 +7,6 @@ import {
   RotateCw,
   Trash2,
   AlertTriangle,
-  CheckCircle,
   Clock,
   Loader2,
   ChevronLeft,
@@ -42,21 +41,21 @@ function StatusBadge({ status, safeErrorMessage }: { status: DocumentStatus; saf
   switch (status) {
     case 'ready':
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <CheckCircle className="w-3.5 h-3.5" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#b6f526]/20 text-[#3b6009] border border-[#b6f526]/40">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#3b6009]" />
           Ready
         </span>
       )
     case 'processing':
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 animate-pulse">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200 animate-pulse">
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
           Processing
         </span>
       )
     case 'uploaded':
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
           <Clock className="w-3.5 h-3.5" />
           Uploaded
         </span>
@@ -64,7 +63,7 @@ function StatusBadge({ status, safeErrorMessage }: { status: DocumentStatus; saf
     case 'failed':
       return (
         <span
-          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20 cursor-help"
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-600 border border-rose-200 cursor-help"
           title={safeErrorMessage || 'Ingestion failed'}
         >
           <AlertTriangle className="w-3.5 h-3.5" />
@@ -73,7 +72,7 @@ function StatusBadge({ status, safeErrorMessage }: { status: DocumentStatus; saf
       )
     default:
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-400 border border-slate-500/20">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
           {status}
         </span>
       )
@@ -211,11 +210,11 @@ export function DocumentList({ onOpenUpload }: DocumentListProps) {
       )}
 
       {/* Document Table */}
-      <div className="card overflow-hidden border border-surface-300">
+      <div className="card overflow-hidden border border-gray-200 shadow-sm bg-white">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse" data-testid="documents-table">
             <thead>
-              <tr className="border-b border-surface-300 bg-surface-100/40 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <tr className="border-b border-gray-200 bg-gray-50/80 text-xs font-bold text-gray-500 uppercase tracking-wider">
                 <th className="py-3 px-3 w-8">
                   <input
                     type="checkbox"
@@ -310,26 +309,27 @@ export function DocumentList({ onOpenUpload }: DocumentListProps) {
                         <>
                           <Link
                             to={`/chat?docId=${doc.id}`}
-                            className="p-1.5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-xs rounded-lg transition-all shadow-sm shadow-[#b6f526]/20 active:scale-95"
                             title="Chat with this document"
                             aria-label={`Chat with ${doc.original_filename}`}
                           >
-                            <MessageSquare className="w-4 h-4" />
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>Chat</span>
                           </Link>
                           <button
                             type="button"
                             onClick={() => setDocumentToSummarize(doc)}
-                            className="p-1.5 text-brand-400 hover:text-brand-300 hover:bg-brand-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                             title="Summarize document"
                             aria-label={`Summarize ${doc.original_filename}`}
                           >
-                            <Sparkles className="w-4 h-4" />
+                            <Sparkles className="w-4 h-4 text-gray-600" />
                           </button>
                         </>
                       )}
                       <button
                         onClick={() => setDocumentToDelete(doc)}
-                        className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                         title="Delete document"
                         aria-label={`Delete ${doc.original_filename}`}
                       >

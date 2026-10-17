@@ -1,14 +1,21 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Brain, BookOpen, FileText, MessageSquare, Upload } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import {
+  FileText,
+  MessageSquare,
+  Upload,
+  CheckCircle,
+  Clock,
+} from 'lucide-react'
 import { UploadDropzone } from './components/UploadDropzone'
 import { DocumentList } from './components/DocumentList'
 import { useDocuments } from './api'
-import { AccountControl } from '@/features/auth/AccountControl'
+import { EchoSidebar } from '@/app/EchoSidebar'
 import { MobileNav } from '@/app/MobileNav'
 
 export function DocumentsPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false)
+  const navigate = useNavigate()
   const { data } = useDocuments(1, 100)
 
   const items = data?.items || []
@@ -17,138 +24,143 @@ export function DocumentsPage() {
   const processingCount = items.filter(
     (d) => d.status === 'processing' || d.status === 'uploaded'
   ).length
-  const failedCount = items.filter((d) => d.status === 'failed').length
 
   return (
-    <div className="min-h-screen bg-surface-50 text-slate-200">
-      <MobileNav />
-      {/* ── Sidebar ──────────────────────────────────────────────────── */}
-      <div className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-surface-100 border-r border-surface-300 flex-col z-20">
-        <div className="flex items-center gap-2 px-4 h-16 border-b border-surface-300">
-          <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center">
-            <Brain className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-white">DocuMind</span>
-        </div>
-
-        <nav className="flex-1 p-3 space-y-1">
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-surface-200 text-sm font-medium transition-colors"
-          >
-            <BookOpen className="w-4 h-4" />
-            Dashboard
-          </Link>
-          <Link
-            to="/documents"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-brand-500/10 text-brand-300 text-sm font-medium"
-          >
-            <FileText className="w-4 h-4" />
-            Documents
-          </Link>
-          <Link
-            to="/chat"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-surface-200 text-sm font-medium transition-colors"
-          >
-            <MessageSquare className="w-4 h-4" />
-            Chat
-          </Link>
-        </nav>
-
-        <div className="p-3 border-t border-surface-300">
-          <AccountControl />
-        </div>
+    <div className="flex h-screen bg-[#F4F5F7] overflow-hidden selection:bg-[#b6f526] selection:text-black">
+      {/* ── Desktop Echo Sidebar ───────────────────────────────────── */}
+      <div className="hidden md:flex flex-shrink-0 h-full">
+        <EchoSidebar onNewChat={() => navigate('/chat')} />
       </div>
 
-      {/* ── Main content ─────────────────────────────────────────────── */}
-      <div className="ml-0 md:ml-64 p-4 sm:p-8 bg-ambient min-h-screen">
-        <div className="max-w-6xl mx-auto space-y-8">
-          {/* Page Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-500/10 text-brand-300 border border-brand-500/20 mb-2">
-                Knowledge Base & Vector Index
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Document Library</h1>
-              <p className="text-slate-400 text-sm mt-1">
-                Upload and manage your documents for AI question answering, semantic search, and citations.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                to="/chat"
-                className="btn-secondary flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-200/80 hover:bg-surface-200 border border-white/[0.08] text-white"
-              >
-                <MessageSquare className="w-4 h-4 text-brand-300" />
-                Ask AI
-              </Link>
-              <button
-                onClick={() => setIsUploadOpen(!isUploadOpen)}
-                className="btn-primary flex items-center gap-2 shadow-lg shadow-brand-500/20 px-5 py-2.5 rounded-xl font-medium"
-                id="toggle-upload-btn"
-              >
-                {isUploadOpen ? (
-                  <>Close Upload</>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4" />
-                    Upload document
-                  </>
-                )}
-              </button>
+      {/* ── Main Workspace ─────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <MobileNav />
+
+        {/* Top Header Bar */}
+        <header className="h-16 bg-white border-b border-gray-200/80 px-6 sm:px-8 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 font-bold text-gray-900 text-sm">
+              <span>DocuMind Library</span>
+              <span className="text-xs text-gray-400">/ Documents</span>
             </div>
           </div>
 
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="card-premium p-4">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Total Documents</span>
-              <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-extrabold text-white">{total}</span>
-                <span className="text-xs text-brand-400 font-medium">Uploaded</span>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/chat"
+              className="bg-[#111215] hover:bg-[#1c1e24] text-white font-medium text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5 active:scale-95"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Ask AI</span>
+            </Link>
+            <button
+              onClick={() => setIsUploadOpen(!isUploadOpen)}
+              className="bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm shadow-[#b6f526]/20 flex items-center gap-1.5 active:scale-95"
+              id="toggle-upload-btn"
+            >
+              <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>{isUploadOpen ? 'Close Upload' : 'Upload Document'}</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Scrollable Canvas */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8">
+          <div className="max-w-5xl mx-auto space-y-8">
+            {/* ── Page Header Card ────────────────────────────────────── */}
+            <div className="bg-white rounded-[28px] p-6 sm:p-8 border border-gray-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#b6f526]/20 text-[#3b6009] border border-[#b6f526]/40 mb-1">
+                  ChromaDB Vector Store Synced
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+                  Document Knowledge Base
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-500 max-w-lg">
+                  Upload PDF, DOCX, or text files. Chunks and embeddings are automatically indexed for citations.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsUploadOpen(true)}
+                  className="bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-xs px-5 py-2.5 rounded-xl shadow-sm shadow-[#b6f526]/20 flex items-center gap-2"
+                >
+                  <Upload className="w-4 h-4 stroke-[2.5]" />
+                  <span>Upload Files</span>
+                </button>
               </div>
             </div>
-            <div className="card-premium p-4">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Ready for Chat</span>
-              <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-extrabold text-emerald-400">{readyCount}</span>
-                <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Indexed
-                </span>
+
+            {/* ── 3 Metric Cards (EchoAI prompt style) ────────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="card p-5 bg-white flex items-center gap-4">
+                <div className="icon-container-lime shrink-0">
+                  <FileText className="w-5 h-5 text-black" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Documents</p>
+                  <p className="text-2xl font-extrabold text-gray-900 mt-0.5">{total}</p>
+                </div>
+              </div>
+
+              <div className="card p-5 bg-white flex items-center gap-4">
+                <div className="icon-container-lime shrink-0">
+                  <CheckCircle className="w-5 h-5 text-black" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Ready for Chat</p>
+                  <p className="text-2xl font-extrabold text-gray-900 mt-0.5">{readyCount}</p>
+                </div>
+              </div>
+
+              <div className="card p-5 bg-white flex items-center gap-4">
+                <div className="icon-container-lime shrink-0">
+                  <Clock className="w-5 h-5 text-black" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Processing / Queue</p>
+                  <p className="text-2xl font-extrabold text-gray-900 mt-0.5">{processingCount}</p>
+                </div>
               </div>
             </div>
-            <div className="card-premium p-4">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Processing</span>
-              <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-extrabold text-blue-400">{processingCount}</span>
-                <span className="text-xs text-blue-400 font-medium">Embedding</span>
+
+            {/* ── Upload Drawer ───────────────────────────────────────── */}
+            {isUploadOpen && (
+              <div className="bg-white rounded-[24px] p-6 border border-gray-200/90 shadow-sm animate-fade-in">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-[#b6f526] text-black flex items-center justify-center font-bold">
+                      <Upload className="w-4 h-4 text-black" />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-bold text-gray-900">Upload New Document</h2>
+                      <p className="text-xs text-gray-500">Files will be converted, chunked, and embedded into vectors.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsUploadOpen(false)}
+                    className="text-xs font-semibold text-gray-500 hover:text-gray-900 px-2 py-1 rounded-lg hover:bg-gray-100"
+                  >
+                    Close
+                  </button>
+                </div>
+                <UploadDropzone onUploadSuccess={() => setIsUploadOpen(false)} />
               </div>
-            </div>
-            <div className="card-premium p-4">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Failed</span>
-              <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-extrabold text-rose-400">{failedCount}</span>
-                <span className="text-xs text-slate-500 font-medium">{failedCount > 0 ? 'Action required' : 'None'}</span>
+            )}
+
+            {/* ── Document List Card ─────────────────────────────────── */}
+            <div className="bg-white rounded-[28px] p-6 sm:p-8 border border-gray-200/80 shadow-sm space-y-6">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 tracking-tight">Indexed Documents</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">Click any document to start grounded chat</p>
+                </div>
               </div>
+              <DocumentList />
             </div>
           </div>
-
-          {/* Upload Dropzone (Collapsible) */}
-          {isUploadOpen && (
-            <div className="animate-fade-in">
-              <UploadDropzone
-                onClose={() => setIsUploadOpen(false)}
-                onUploadSuccess={() => {
-                  // Keep dropzone open or close after short delay
-                }}
-              />
-            </div>
-          )}
-
-          {/* Documents Table / Grid */}
-          <DocumentList onOpenUpload={() => setIsUploadOpen(true)} />
-        </div>
+        </main>
       </div>
     </div>
   )

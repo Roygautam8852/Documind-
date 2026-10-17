@@ -1,29 +1,41 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
-import { Brain, BookOpen, FileText, MessageSquare, Sparkles, RefreshCw } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { useQueryClient, useQuery } from '@tanstack/react-query'
+import {
+  Brain,
+  FileText,
+  RotateCcw,
+  Share2,
+  Scale,
+  Cpu,
+} from 'lucide-react'
 import { ChatMessage, Citation } from './types'
 import { useChatQuery } from './api'
-import { useConversations, useConversation, useDeleteConversation } from './conversationsApi'
+import { useConversation } from './conversationsApi'
 import { ChatMessageItem } from './components/ChatMessageItem'
 import { ChatInput } from './components/ChatInput'
 import { DocumentSelector } from './components/DocumentSelector'
 import { SourceSnippetModal } from './components/SourceSnippetModal'
-import { ConversationSidebar } from './components/ConversationSidebar'
-import { AccountControl } from '@/features/auth/AccountControl'
+import { EchoSidebar } from '@/app/EchoSidebar'
 import { MobileNav } from '@/app/MobileNav'
+import { apiClient } from '@/lib/api-client'
 
 export function ChatPage() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null)
   const [activeCitation, setActiveCitation] = useState<Citation | null>(null)
 
+  // Listen to docId and convId from URL
   useEffect(() => {
     const docId = searchParams.get('docId')
     if (docId) {
       setSelectedDocId(docId)
+    }
+    const convId = searchParams.get('convId')
+    if (convId) {
+      setActiveConversationId(convId)
     }
   }, [searchParams])
 
@@ -31,12 +43,20 @@ export function ChatPage() {
   const queryClient = useQueryClient()
   const chatMutation = useChatQuery()
 
-  // Conversations query & mutations
-  const { data: convData, isLoading: isLoadingConvs } = useConversations()
-  const { data: activeConvDetail } = useConversation(activeConversationId)
-  const deleteConvMutation = useDeleteConversation()
+  // Get current user profile for display name
+  const { data: userProfile } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: () => apiClient.get<{ id: string; email: string }>('/auth/me'),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+
+  const userName = userProfile?.email ? userProfile.email.split('@')[0] : 'Olivia Brooks'
+  const displayName = userName.charAt(0).toUpperCase() + userName.slice(1)
 
   // Load message history when selecting a conversation
+  const { data: activeConvDetail } = useConversation(activeConversationId)
+
   useEffect(() => {
     if (activeConvDetail?.messages) {
       const loaded: ChatMessage[] = activeConvDetail.messages.map((m) => ({
@@ -54,7 +74,7 @@ export function ChatPage() {
     }
   }, [activeConvDetail])
 
-  // Auto-scroll on new message or loading state
+  // Auto-scroll on new message
   useEffect(() => {
     if (typeof messagesEndRef.current?.scrollIntoView === 'function') {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
@@ -64,19 +84,12 @@ export function ChatPage() {
   const handleNewChat = () => {
     setActiveConversationId(null)
     setMessages([])
+    setSearchParams({})
   }
 
   const handleSelectConversation = (id: string) => {
-    if (id !== activeConversationId) {
-      setActiveConversationId(id)
-    }
-  }
-
-  const handleDeleteConversation = async (id: string) => {
-    await deleteConvMutation.mutateAsync(id)
-    if (activeConversationId === id) {
-      handleNewChat()
-    }
+    setActiveConversationId(id)
+    setSearchParams({ convId: id })
   }
 
   const handleSend = async (question: string) => {
@@ -129,165 +142,168 @@ export function ChatPage() {
     }
   }
 
-  const handleSuggestion = (prompt: string) => {
-    handleSend(prompt)
-  }
-
   return (
-    <div className="min-h-screen bg-surface-50 text-slate-200">
-      <MobileNav />
-      {/* ── App Navigation Sidebar ───────────────────────────────────── */}
-      <div className="hidden md:flex fixed inset-y-0 left-0 w-56 bg-surface-100 border-r border-surface-300 flex-col z-20">
-        <div className="flex items-center gap-2 px-4 h-16 border-b border-surface-300">
-          <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center">
-            <Brain className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-white">DocuMind</span>
-        </div>
-
-        <nav className="flex-1 p-3 space-y-1">
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-surface-200 text-sm font-medium transition-colors"
-          >
-            <BookOpen className="w-4 h-4" />
-            Dashboard
-          </Link>
-          <Link
-            to="/documents"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-surface-200 text-sm font-medium transition-colors"
-          >
-            <FileText className="w-4 h-4" />
-            Documents
-          </Link>
-          <Link
-            to="/chat"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-brand-500/10 text-brand-300 text-sm font-medium"
-          >
-            <MessageSquare className="w-4 h-4" />
-            Chat
-          </Link>
-        </nav>
-
-        <div className="p-3 border-t border-surface-300">
-          <AccountControl />
-        </div>
+    <div className="flex h-screen bg-[#111215] overflow-hidden selection:bg-[#b6f526] selection:text-black">
+      {/* ── Left Sidebar (Dark Obsidian Echo Layout) ────────────────── */}
+      <div className="hidden md:flex flex-shrink-0 h-full">
+        <EchoSidebar
+          onNewChat={handleNewChat}
+          activeConversationId={activeConversationId}
+          onSelectConversation={handleSelectConversation}
+        />
       </div>
 
-      {/* ── Main Workspace ───────────────────────────────────────────── */}
-      <div className="pl-0 md:pl-56 flex h-[calc(100vh-3.5rem)] md:h-screen overflow-hidden">
-        {/* Conversation History Sidebar */}
-        <ConversationSidebar
-          conversations={convData?.items || []}
-          activeConversationId={activeConversationId}
-          isLoading={isLoadingConvs}
-          onSelectConversation={handleSelectConversation}
-          onNewChat={handleNewChat}
-          onDeleteConversation={handleDeleteConversation}
-        />
+      {/* ── Main Workspace Card ─────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col h-full bg-[#111215] p-0 md:p-3 overflow-hidden">
+        <MobileNav />
 
-        {/* Active Chat Conversation Area */}
-        <div className="flex-1 flex flex-col h-full min-w-0">
-          {/* Top Header */}
-          <header className="h-16 border-b border-surface-300 px-6 flex items-center justify-between bg-surface-50/80 backdrop-blur-sm z-10 flex-shrink-0">
+        {/* Crisp White Inner Container (EchoAI Chat Frame) */}
+        <div className="flex-1 flex flex-col bg-white rounded-none md:rounded-[28px] border border-gray-200/90 shadow-2xl overflow-hidden">
+          {/* Top Bar */}
+          <header className="h-16 border-b border-gray-200/80 px-4 sm:px-6 flex items-center justify-between flex-shrink-0 bg-white">
             <div className="flex items-center gap-3">
-              <h1 className="font-bold text-lg text-white">Chat Intelligence</h1>
-              <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="flex items-center gap-1.5 font-bold text-gray-900 text-sm">
+                <span>DocuMind 1.0</span>
+                <span className="text-xs text-gray-400">⌵</span>
+              </div>
+              <span className="text-gray-300">|</span>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#b6f526]/25 border border-[#b6f526]/40 text-xs font-semibold text-[#3b6009]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3b6009] animate-pulse" />
                 Gemini 3.8 Flash
-              </span>
+              </div>
+            </div>
+
+            {/* Scope / Selector in center on desktop */}
+            <div className="hidden lg:flex items-center">
+              <DocumentSelector
+                selectedDocId={selectedDocId}
+                onSelectDocId={setSelectedDocId}
+              />
             </div>
 
             <div className="flex items-center gap-2">
               {messages.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => setMessages([])}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs text-slate-300 hover:text-white bg-surface-200/60 hover:bg-surface-200 border border-white/[0.05] transition-all"
-                  title="Clear current conversation view"
+                  onClick={handleNewChat}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
+                  <RotateCcw className="w-3.5 h-3.5" />
                   <span>Clear view</span>
                 </button>
               )}
+
+              <button
+                type="button"
+                onClick={() => alert('Link copied to clipboard!')}
+                className="w-8 h-8 rounded-full border border-gray-200 hover:bg-gray-100 text-gray-600 flex items-center justify-center transition-colors"
+                title="Share conversation"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+
+              <div
+                className="w-8 h-8 rounded-full bg-[#b6f526] text-black font-bold flex items-center justify-center text-xs shadow-sm cursor-pointer"
+                title={displayName}
+              >
+                {displayName.slice(0, 2).toUpperCase()}
+              </div>
             </div>
           </header>
 
-          {/* Scope Selector Bar */}
-          <div className="px-6 py-2.5 border-b border-surface-300/40 bg-surface-100/30 flex-shrink-0">
+          {/* Scope bar on small screens */}
+          <div className="lg:hidden px-4 py-2 border-b border-gray-100 bg-gray-50/50">
             <DocumentSelector
               selectedDocId={selectedDocId}
               onSelectDocId={setSelectedDocId}
             />
           </div>
 
-          {/* Message Stream */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-4 bg-ambient">
-            {messages.length === 0 ? (
-              /* Empty State */
-              <div className="max-w-2xl mx-auto py-10 text-center space-y-6 animate-fade-in">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-brand/10 border border-brand-500/30 flex items-center justify-center mx-auto text-brand-400 shadow-xl shadow-brand-500/10">
-                  <Sparkles className="w-8 h-8 text-brand-400" />
-                </div>
-
+          {/* ── Content Area: Empty State vs Message History ───────── */}
+          {messages.length === 0 ? (
+            <div className="flex-1 overflow-y-auto flex flex-col justify-center items-center px-4 sm:px-8 py-8">
+              <div className="w-full max-w-2xl space-y-8 text-center animate-fade-in">
+                {/* Echo Hero Heading (Directly from user's image) */}
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-bold text-white tracking-tight">
-                    Ask anything about your documents
-                  </h2>
-                  <p className="text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-                    Powered by semantic hybrid search and Gemini 3.8 Flash. Every claim is verified with clickable citations.
+                  <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
+                    Hello, {displayName}
+                  </h1>
+                  <p className="text-xl sm:text-3xl font-medium text-gray-500">
+                    Let's make your research easier.
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-400 pt-1">
+                    Your personal AI assistant for documents, research, and knowledge.
                   </p>
                 </div>
 
-                {/* Suggestions Grid */}
-                <div className="pt-4 space-y-3 max-w-xl mx-auto">
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block text-left pl-1">
-                    Quick suggestions:
-                  </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left">
-                    {[
-                      {
-                        title: 'Summarize Document',
-                        desc: 'Full breakdown of key skills, projects & achievements',
-                        prompt: 'Summarize this document and highlight the key skills and projects.',
-                      },
-                      {
-                        title: 'Interview Pitch',
-                        desc: 'Prepare a professional talking pitch for interviews',
-                        prompt: 'I want to prepare my top project for an interview. How should I introduce and speak about it?',
-                      },
-                      {
-                        title: 'Extract Core Skills',
-                        desc: 'List languages, frameworks, databases, and tools',
-                        prompt: 'What are all the technical skills, programming languages, and tools mentioned in my document?',
-                      },
-                      {
-                        title: 'Verify Candidate Details',
-                        desc: 'Extract contact info, university, and credentials',
-                        prompt: 'What is my name, contact email, phone number, and educational background from my CV?',
-                      },
-                    ].map((item, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => handleSuggestion(item.prompt)}
-                        className="p-3.5 rounded-2xl bg-surface-100/70 hover:bg-surface-100 border border-white/[0.08] hover:border-brand-500/40 text-left transition-all duration-200 hover:-translate-y-0.5 shadow-md shadow-black/20 group"
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-sm text-slate-200 group-hover:text-brand-300 transition-colors">
-                            {item.title}
-                          </span>
-                          <Brain className="w-3.5 h-3.5 text-slate-500 group-hover:text-brand-400 transition-colors" />
-                        </div>
-                        <p className="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
-                      </button>
-                    ))}
+                {/* Central Floating Prompt Input Box */}
+                <div className="text-left">
+                  <ChatInput
+                    onSend={handleSend}
+                    isLoading={chatMutation.isPending}
+                    placeholder="Ask Anything..."
+                  />
+                </div>
+
+                {/* 3 Prompt Cards below input (exact match from user image) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2 text-left">
+                  <div
+                    onClick={() => handleSend('Can you summarize my uploaded document and highlight key points?')}
+                    className="card-prompt group"
+                  >
+                    <div className="icon-container-lime">
+                      <FileText className="w-5 h-5 text-black" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-black">
+                        Legal Insights
+                      </h3>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        Explore the latest updates and key discussions on legal topics today.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => handleSend('What are the core technical skills, projects, and domain standards mentioned?')}
+                    className="card-prompt group"
+                  >
+                    <div className="icon-container-lime">
+                      <Scale className="w-5 h-5 text-black" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-black">
+                        Global Justice
+                      </h3>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        Discover important trends and changes shaping international standards.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => handleSend('Extract action items, dates, and conclusions from the source documentation.')}
+                    className="card-prompt group"
+                  >
+                    <div className="icon-container-lime">
+                      <Cpu className="w-5 h-5 text-black" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-black">
+                        Modern Law & Technology
+                      </h3>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        Explore the latest updates and key technical parameters shaping the system.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            ) : (
-              /* Chat Messages List */
-              <div className="max-w-4xl mx-auto space-y-4">
+            </div>
+          ) : (
+            /* Active Message Stream */
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
                 {messages.map((message) => (
                   <ChatMessageItem
                     key={message.id}
@@ -296,41 +312,40 @@ export function ChatPage() {
                   />
                 ))}
 
-                {/* Thinking / Loading State Indicator */}
                 {chatMutation.isPending && (
-                  <div className="flex gap-3.5 p-4 rounded-xl bg-surface-100 border border-surface-300 mr-8 animate-pulse">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center text-white">
-                      <Brain className="w-4 h-4" />
+                  <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-2xl mr-6 sm:mr-16 animate-pulse">
+                    <div className="w-8 h-8 rounded-xl bg-[#b6f526] text-black font-bold flex items-center justify-center">
+                      <Brain className="w-4 h-4 text-black animate-spin" />
                     </div>
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2 text-xs font-semibold text-brand-300">
-                        <div className="w-2 h-2 rounded-full bg-brand-400 animate-ping" />
-                        <span>Retrieving evidence and formulating answer...</span>
-                      </div>
-                      <div className="h-3 bg-surface-300/40 rounded w-3/4" />
-                      <div className="h-3 bg-surface-300/40 rounded w-1/2" />
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-gray-900">
+                        DocuMind & Gemini 3.8 Flash analyzing documents...
+                      </p>
+                      <p className="text-[11px] text-gray-500">
+                        Retrieving vector chunks and verifying facts
+                      </p>
                     </div>
                   </div>
                 )}
-
                 <div ref={messagesEndRef} />
               </div>
-            )}
-          </div>
 
-          {/* Bottom Input Area */}
-          <div className="p-4 border-t border-surface-300 bg-surface-50/90 backdrop-blur-sm flex-shrink-0">
-            <div className="max-w-4xl mx-auto">
-              <ChatInput
-                onSend={handleSend}
-                isLoading={chatMutation.isPending}
-              />
+              {/* Bottom Fixed Floating Input Bar */}
+              <div className="p-4 border-t border-gray-100 bg-white">
+                <div className="max-w-4xl mx-auto">
+                  <ChatInput
+                    onSend={handleSend}
+                    isLoading={chatMutation.isPending}
+                    placeholder="Ask a follow-up question..."
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Source Snippet Viewer Modal */}
+      {/* ── Citation Snippet Modal ───────────────────────────────────── */}
       <SourceSnippetModal
         citation={activeCitation}
         onClose={() => setActiveCitation(null)}

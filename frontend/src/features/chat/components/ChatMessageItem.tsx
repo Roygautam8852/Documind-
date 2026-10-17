@@ -32,7 +32,6 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
 
   // Parse inline text containing bold, code, and [S1] citation tags
   const renderInlineFormatted = (inlineText: string) => {
-    // Regex matches: [S\d+], `code`, **bold**
     const tokenRegex = /(\[S\d+\]|`[^`]+`|\*\*[^*]+\*\*)/g
     const parts = inlineText.split(tokenRegex)
 
@@ -48,7 +47,7 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
               key={idx}
               type="button"
               onClick={() => onSelectCitation(citation)}
-              className="inline-flex items-center px-1.5 py-0.5 mx-0.5 rounded text-xs font-semibold text-brand-300 bg-brand-500/15 hover:bg-brand-500/30 border border-brand-500/30 shadow-sm align-baseline cursor-pointer transition-all hover:scale-105"
+              className="inline-flex items-center px-2 py-0.5 mx-0.5 rounded-lg text-xs font-extrabold text-black bg-[#b6f526] hover:bg-[#a5e61c] shadow-sm cursor-pointer transition-all hover:scale-105 active:scale-95"
               title={`View citation [${tag}] from ${citation.filename}`}
             >
               [{tag}]
@@ -60,7 +59,10 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
       // Inline code `code`
       if (part.startsWith('`') && part.endsWith('`') && part.length >= 2) {
         return (
-          <code key={idx} className="px-1.5 py-0.5 rounded bg-surface-300/70 text-brand-300 font-mono text-xs border border-white/[0.05]">
+          <code
+            key={idx}
+            className="px-1.5 py-0.5 rounded-md bg-gray-100 text-[#3b6009] font-mono text-xs border border-gray-200"
+          >
             {part.slice(1, -1)}
           </code>
         )
@@ -69,7 +71,7 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
       // Bold text **bold**
       if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
         return (
-          <strong key={idx} className="font-semibold text-white">
+          <strong key={idx} className={isUser ? 'font-bold text-white' : 'font-bold text-gray-900'}>
             {part.slice(2, -2)}
           </strong>
         )
@@ -79,10 +81,10 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
     })
   }
 
-  // Parse text into structured markdown paragraphs, headings, and lists
+  // Parse text into structured paragraphs, headings, and lists
   const renderMessageContent = (text: string) => {
     if (isUser) {
-      return <p className="whitespace-pre-wrap leading-relaxed text-slate-100">{text}</p>
+      return <p className="whitespace-pre-wrap leading-relaxed text-slate-100 text-sm">{text}</p>
     }
 
     const lines = text.split('\n')
@@ -94,8 +96,8 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
         elements.push(
           <ul key={`list-${keyPrefix}`} className="my-2 space-y-1.5 pl-1">
             {currentList.map((item, liIdx) => (
-              <li key={liIdx} className="flex items-start gap-2.5 text-slate-200 text-sm leading-relaxed">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-400 mt-2 flex-shrink-0" />
+              <li key={liIdx} className="flex items-start gap-2.5 text-gray-800 text-sm leading-relaxed">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3b6009] mt-2 flex-shrink-0" />
                 <span className="flex-1">{renderInlineFormatted(item)}</span>
               </li>
             ))}
@@ -105,96 +107,66 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
       }
     }
 
-    lines.forEach((line, idx) => {
+    lines.forEach((line, lineIdx) => {
       const trimmed = line.trim()
 
-      if (!trimmed) {
-        flushList(idx)
+      if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        currentList.push(trimmed.slice(2))
         return
       }
 
-      // Divider
-      if (trimmed === '---' || trimmed === '***') {
-        flushList(idx)
-        elements.push(<hr key={idx} className="border-surface-300/60 my-3" />)
-        return
-      }
+      flushList(lineIdx)
 
-      // H3 Heading: ### Title
       if (trimmed.startsWith('### ')) {
-        flushList(idx)
         elements.push(
-          <h3 key={idx} className="text-base font-bold text-brand-300 mt-3.5 mb-1.5 flex items-center gap-2">
-            <span className="w-1 h-4 rounded-full bg-brand-400 inline-block" />
+          <h3 key={lineIdx} className="text-base font-bold text-gray-900 mt-4 mb-1.5 tracking-tight">
             {renderInlineFormatted(trimmed.slice(4))}
           </h3>
         )
-        return
-      }
-
-      // H2 Heading: ## Title
-      if (trimmed.startsWith('## ')) {
-        flushList(idx)
+      } else if (trimmed.startsWith('## ')) {
         elements.push(
-          <h2 key={idx} className="text-lg font-bold text-white mt-4 mb-2">
+          <h2 key={lineIdx} className="text-lg font-extrabold text-gray-900 mt-5 mb-2 tracking-tight">
             {renderInlineFormatted(trimmed.slice(3))}
           </h2>
         )
-        return
-      }
-
-      // Bullet item: * or -
-      if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-        const itemContent = trimmed.replace(/^[\*\-•]\s*/, '')
-        currentList.push(itemContent)
-        return
-      }
-
-      // Numbered item: 1. Item
-      const numMatch = trimmed.match(/^(\d+)\.\s*(.*)/)
-      if (numMatch) {
-        flushList(idx)
+      } else if (trimmed.startsWith('# ')) {
         elements.push(
-          <div key={idx} className="flex items-start gap-2.5 my-1.5 text-sm leading-relaxed text-slate-200">
-            <span className="text-xs font-bold text-brand-400 bg-brand-500/15 px-1.5 py-0.5 rounded border border-brand-500/20 flex-shrink-0 mt-0.5">
-              {numMatch[1]}
-            </span>
-            <div className="flex-1">{renderInlineFormatted(numMatch[2])}</div>
-          </div>
+          <h1 key={lineIdx} className="text-xl font-extrabold text-gray-900 mt-6 mb-2 tracking-tight">
+            {renderInlineFormatted(trimmed.slice(2))}
+          </h1>
         )
-        return
+      } else if (trimmed === '---') {
+        elements.push(<hr key={lineIdx} className="my-4 border-gray-200" />)
+      } else if (trimmed.length > 0) {
+        elements.push(
+          <p key={lineIdx} className="text-sm text-gray-800 leading-relaxed my-1.5">
+            {renderInlineFormatted(trimmed)}
+          </p>
+        )
       }
-
-      // Standard paragraph
-      flushList(idx)
-      elements.push(
-        <p key={idx} className="my-1.5 leading-relaxed text-slate-200 text-sm">
-          {renderInlineFormatted(trimmed)}
-        </p>
-      )
     })
 
     flushList(lines.length)
-    return <div className="space-y-1">{elements}</div>
+    return <div className="space-y-0.5">{elements}</div>
   }
 
   return (
     <div
-      className={`group relative flex gap-3.5 p-4 rounded-2xl transition-all duration-200 ${
+      className={`group relative flex gap-3.5 p-5 rounded-2xl transition-all duration-200 ${
         isUser
-          ? 'bg-gradient-to-br from-brand-900/30 via-surface-100/80 to-surface-100/90 border border-brand-500/20 ml-6 sm:ml-12 shadow-md shadow-brand-950/20'
-          : 'bg-surface-100/80 border border-white/[0.08] mr-6 sm:mr-12 shadow-lg shadow-black/20 backdrop-blur-md hover:border-surface-300'
+          ? 'bg-[#111215] text-white border border-[#202228] ml-6 sm:ml-16 shadow-md'
+          : 'bg-white border border-gray-200/90 mr-6 sm:mr-16 shadow-sm hover:border-gray-300'
       }`}
     >
       {/* Avatar */}
       <div className="flex-shrink-0">
         {isUser ? (
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-brand-600/30">
+          <div className="w-8 h-8 rounded-xl bg-[#1c1e24] border border-[#2d303a] flex items-center justify-center text-white">
             <User className="w-4 h-4" />
           </div>
         ) : (
-          <div className="w-8 h-8 rounded-xl bg-gradient-brand flex items-center justify-center text-white shadow-md shadow-brand-500/30">
-            <Brain className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-xl bg-[#b6f526] text-black font-bold flex items-center justify-center shadow-sm">
+            <Brain className="w-4 h-4 text-black" />
           </div>
         )}
       </div>
@@ -202,43 +174,43 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
       {/* Message Body */}
       <div className="flex-1 space-y-2.5 overflow-hidden">
         {/* Header row */}
-        <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="flex items-center justify-between text-xs text-gray-400">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-100">
-              {isUser ? 'You' : 'DocuMind AI'}
+            <span className={`font-bold ${isUser ? 'text-white' : 'text-gray-900'}`}>
+              {isUser ? 'You' : 'DocuMind'}
             </span>
             {!isUser && (
-              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-[#b6f526]/20 text-[#3b6009] border border-[#b6f526]/40 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3b6009] animate-pulse" />
                 Gemini 3.8 Flash
               </span>
             )}
             {!isUser && message.retrievalStrategy && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-200/80 text-slate-300 border border-surface-300 font-mono">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200 font-mono">
                 {message.retrievalStrategy === 'hybrid' ? 'Hybrid Search' : 'Dense Vector'}
               </span>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span>{message.timestamp}</span>
+            <span className="text-[11px]">{message.timestamp}</span>
             {/* Copy Button */}
             {!isUser && (
               <button
                 type="button"
                 onClick={handleCopy}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-200 text-slate-400 hover:text-slate-200"
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700"
                 title="Copy response"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-[#3b6009]" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             )}
           </div>
         </div>
 
         {/* Content */}
-        <div className={`text-sm ${message.isError ? 'text-rose-400' : ''}`}>
+        <div className={`text-sm ${message.isError ? 'text-rose-600' : ''}`}>
           {message.isError && (
-            <div className="flex items-center gap-1.5 text-rose-400 mb-2 font-medium">
+            <div className="flex items-center gap-1.5 text-rose-600 mb-2 font-medium">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>Query Error</span>
             </div>
@@ -248,13 +220,13 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
 
         {/* Citations List if present */}
         {!isUser && message.citations && message.citations.length > 0 && (
-          <div className="pt-3 mt-3 border-t border-white/[0.06] space-y-2">
+          <div className="pt-3 mt-3 border-t border-gray-100 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                Verified Sources ({message.citations.length}):
+              <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#b6f526]" />
+                Sources Referenced ({message.citations.length}):
               </span>
-              <span className="text-[10px] text-slate-400">Click to view excerpt</span>
+              <span className="text-[10px] text-gray-400">Click to view source excerpt</span>
             </div>
             <div className="flex flex-wrap gap-2 pt-0.5">
               {message.citations.map((c) => (
@@ -271,4 +243,3 @@ export function ChatMessageItem({ message, onSelectCitation }: ChatMessageItemPr
     </div>
   )
 }
-

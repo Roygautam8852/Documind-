@@ -50,91 +50,142 @@ body {
 
 /* ── Focus ring ──────────────────────────────────────────────────────────── */
 :focus-visible {
-  @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-surface-50;
+  @apply outline-none ring-2 ring-neon-500 ring-offset-2 ring-offset-white;
 }
 
 /* ── Typography utilities ────────────────────────────────────────────────── */
 .heading-xl {
-  @apply text-3xl font-bold tracking-tight text-white;
+  @apply text-3xl sm:text-4xl font-bold tracking-tight text-gray-900;
 }
 
 .heading-lg {
-  @apply text-2xl font-semibold tracking-tight text-white;
+  @apply text-2xl font-bold tracking-tight text-gray-900;
 }
 
 .heading-md {
-  @apply text-xl font-semibold text-white;
+  @apply text-xl font-semibold text-gray-900;
 }
 
 .text-muted {
-  @apply text-surface-500;
+  @apply text-gray-500;
 }
 
 /* ── Card ────────────────────────────────────────────────────────────────── */
 .card {
-  @apply bg-surface-100 border border-surface-300 rounded-xl;
+  @apply bg-white border border-gray-200/90 rounded-2xl shadow-sm;
 }
 
 .card-hover {
-  @apply card transition-all duration-200 hover:border-brand-500/40 hover:shadow-lg hover:shadow-brand-500/5;
+  @apply card transition-all duration-200 hover:border-gray-300 hover:shadow-md;
+}
+
+.card-dark {
+  @apply bg-[#1c1e24] border border-[#262933] rounded-2xl text-slate-200;
 }
 
 /* ── Button variants ─────────────────────────────────────────────────────── */
 .btn {
-  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
-         font-medium text-sm transition-all duration-200 disabled:opacity-50
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
+         font-semibold text-sm transition-all duration-150 disabled:opacity-50
          disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2
-         focus-visible:ring-brand-500;
+         focus-visible:ring-neon-500 active:scale-[0.98];
 }
 
-.btn-primary {
-  @apply btn bg-brand-600 text-white hover:bg-brand-500 active:bg-brand-700
-         shadow-sm shadow-brand-500/20;
+/* Vibrant Neon Lime Primary Button (matching Upgrade button in image) */
+.btn-primary, .btn-lime {
+  @apply btn bg-[#b6f526] text-black font-bold hover:bg-[#a5e61c] active:bg-[#94d412]
+         shadow-sm shadow-[#b6f526]/30 border border-[#b6f526]/20;
 }
 
+/* Deep Charcoal / Dark Button */
+.btn-dark {
+  @apply btn bg-[#111215] text-white hover:bg-[#1c1e24] active:bg-black
+         border border-[#262933] shadow-sm;
+}
+
+/* Clean White / Light Secondary Button */
 .btn-secondary {
-  @apply btn bg-surface-200 text-slate-200 hover:bg-surface-300 border border-surface-300;
+  @apply btn bg-white text-gray-800 hover:bg-gray-50 active:bg-gray-100
+         border border-gray-200/90 shadow-sm;
 }
 
 .btn-ghost {
-  @apply btn text-slate-400 hover:bg-surface-200 hover:text-slate-200;
+  @apply btn text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+}
+
+.btn-ghost-dark {
+  @apply btn text-slate-400 hover:bg-[#1c1e24] hover:text-white;
 }
 
 .btn-danger {
-  @apply btn bg-red-600/20 text-red-400 hover:bg-red-600/30 border border-red-500/30;
+  @apply btn bg-red-500/10 text-red-600 hover:bg-red-500/20 border border-red-500/20;
+}
+
+/* Circular Buttons */
+.btn-circle-dark {
+  @apply w-9 h-9 rounded-full bg-[#111215] hover:bg-black text-white
+         flex items-center justify-center transition-all duration-150 active:scale-95 shadow-sm;
+}
+
+.btn-circle-light {
+  @apply w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700
+         flex items-center justify-center transition-all duration-150 active:scale-95;
 }
 
 /* ── Input ───────────────────────────────────────────────────────────────── */
 .input {
-  @apply w-full bg-surface-200 border border-surface-300 text-slate-200
-         placeholder-surface-500 rounded-lg px-3 py-2 text-sm
-         transition-colors duration-200
-         focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent;
+  @apply w-full bg-white border border-gray-200 text-gray-900
+         placeholder-gray-400 rounded-xl px-3.5 py-2.5 text-sm
+         transition-all duration-150 shadow-sm
+         focus:outline-none focus:ring-2 focus:ring-neon-500 focus:border-transparent;
+}
+
+.input-dark {
+  @apply w-full bg-[#1c1e24] border border-[#262933] text-slate-100
+         placeholder-slate-500 rounded-xl px-3.5 py-2.5 text-sm
+         transition-all duration-150
+         focus:outline-none focus:ring-2 focus:ring-neon-500 focus:border-transparent;
+}
+
+/* ── Echo Prompt & Topic Cards ───────────────────────────────────────────── */
+.card-prompt {
+  @apply bg-white rounded-2xl border border-gray-200/90 p-5 shadow-sm
+         hover:border-gray-300 hover:shadow-md transition-all duration-200
+         cursor-pointer text-left flex flex-col justify-between;
+}
+
+.icon-container-lime {
+  @apply w-10 h-10 rounded-xl bg-[#b6f526] text-black flex items-center justify-center
+         font-bold shadow-sm transition-transform duration-200 group-hover:scale-105;
 }
 
 /* ── Badge ───────────────────────────────────────────────────────────────── */
 .badge {
-  @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+}
+
+.badge-neon {
+  @apply badge bg-[#b6f526]/25 text-[#3e680a] border border-[#b6f526]/40;
 }
 
 .badge-success {
-  @apply badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/25;
+  @apply badge bg-[#b6f526]/20 text-[#3e680a] border border-[#b6f526]/40;
 }
 
 .badge-warning {
-  @apply badge bg-amber-500/15 text-amber-400 border border-amber-500/25;
+  @apply badge bg-amber-500/15 text-amber-700 border border-amber-500/25;
 }
 
 .badge-error {
-  @apply badge bg-red-500/15 text-red-400 border border-red-500/25;
+  @apply badge bg-red-500/15 text-red-600 border border-red-500/25;
 }
 
 .badge-info {
-  @apply badge bg-blue-500/15 text-blue-400 border border-blue-500/25;
+  @apply badge bg-blue-500/15 text-blue-600 border border-blue-500/25;
 }
 
 .badge-processing {
-  @apply badge bg-brand-500/15 text-brand-300 border border-brand-500/25;
+  @apply badge bg-neon-500/20 text-[#3e680a] border border-neon-500/30;
 }
 
 /* ── Loading skeleton ────────────────────────────────────────────────────── */
@@ -194,28 +245,37 @@ body {
   box-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
 }
 
+.glow-lime {
+  box-shadow: 0 0 16px rgba(182, 245, 38, 0.35);
+}
+
 .glow-brand {
-  box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 0 16px rgba(182, 245, 38, 0.3);
 }
 
 /* ── Prose override for AI answers ──────────────────────────────────────── */
 .prose-answer {
-  @apply prose prose-invert prose-sm max-w-none
-         prose-headings:text-white prose-headings:font-bold prose-headings:tracking-tight
-         prose-h3:text-base prose-h3:mt-3 prose-h3:mb-1.5 prose-h3:text-brand-300
-         prose-h4:text-sm prose-h4:text-slate-200
-         prose-p:text-slate-200 prose-p:leading-relaxed prose-p:my-1.5
-         prose-ul:my-1.5 prose-ul:pl-4 prose-li:my-0.5 prose-li:text-slate-200
-         prose-strong:text-white prose-strong:font-semibold
-         prose-code:text-brand-300 prose-code:bg-surface-300/60 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-xs
-         prose-pre:bg-surface-200/90 prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl;
+  @apply prose prose-sm max-w-none text-gray-800
+         prose-headings:text-gray-900 prose-headings:font-bold prose-headings:tracking-tight
+         prose-h3:text-base prose-h3:mt-3 prose-h3:mb-1.5 prose-h3:text-gray-900
+         prose-h4:text-sm prose-h4:text-gray-800
+         prose-p:text-gray-800 prose-p:leading-relaxed prose-p:my-1.5
+         prose-ul:my-1.5 prose-ul:pl-4 prose-li:my-0.5 prose-li:text-gray-700
+         prose-strong:text-gray-900 prose-strong:font-bold
+         prose-code:text-[#3b6009] prose-code:bg-lime-100/70 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-xs
+         prose-pre:bg-[#111215] prose-pre:text-slate-100 prose-pre:border prose-pre:border-gray-800 prose-pre:rounded-xl;
 }
 
 /* ── Ambient Radial Background ──────────────────────────────────────────── */
 .bg-ambient {
+  background-color: #f4f5f7;
   background-image: 
-    radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.04) 0%, transparent 50%);
+    radial-gradient(circle at 10% 10%, rgba(182, 245, 38, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(0, 0, 0, 0.02) 0%, transparent 40%);
 }
+
+.bg-echo-outer {
+  background-color: #0c0d0e;
+}
+
 

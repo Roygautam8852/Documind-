@@ -1,21 +1,29 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react'
-import { Send, Loader2 } from 'lucide-react'
+import { ArrowUp, Loader2, Plus } from 'lucide-react'
 
 interface ChatInputProps {
   onSend: (question: string) => void
   isLoading: boolean
   disabled?: boolean
+  onAttachClick?: () => void
+  placeholder?: string
 }
 
-export function ChatInput({ onSend, isLoading, disabled = false }: ChatInputProps) {
+export function ChatInput({
+  onSend,
+  isLoading,
+  disabled = false,
+  onAttachClick,
+  placeholder = 'Ask Anything...',
+}: ChatInputProps) {
   const [text, setText] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Auto-resize textarea up to 200px
+  // Auto-resize textarea up to 180px
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 180)}px`
     }
   }, [text])
 
@@ -36,45 +44,58 @@ export function ChatInput({ onSend, isLoading, disabled = false }: ChatInputProp
     }
   }
 
+  const hasContent = text.trim().length > 0
+
   return (
-    <div className="relative bg-surface-100/90 backdrop-blur-xl border border-white/[0.1] rounded-2xl shadow-xl shadow-black/20 p-2.5 focus-within:border-brand-500/60 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all">
+    <div className="relative bg-white border border-gray-200/90 rounded-[24px] shadow-lg shadow-black/[0.04] p-3 transition-all focus-within:border-gray-300 focus-within:shadow-xl focus-within:ring-2 focus-within:ring-[#b6f526]">
       <textarea
         ref={textareaRef}
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={
-          disabled
-            ? 'No ready documents to query. Please upload documents first.'
-            : 'Ask a question about your documents... (Press Enter ↵ to send, Shift+Enter for new line)'
-        }
+        placeholder={disabled ? 'No ready documents. Upload documents first.' : placeholder}
         disabled={disabled || isLoading}
         rows={1}
-        className="w-full resize-none bg-transparent text-sm text-slate-100 placeholder-slate-400 focus:outline-none px-3 py-1.5 min-h-[44px] max-h-[200px]"
+        className="w-full resize-none bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none px-3 pt-1 pb-2 min-h-[42px] max-h-[180px]"
       />
 
-      <div className="flex items-center justify-between px-3 pt-2 border-t border-white/[0.06] text-xs text-slate-400">
-        <span className="text-[11px] text-slate-400">{text.length} / 4000 characters</span>
-
+      <div className="flex items-center justify-between px-2 pt-1">
+        {/* Left: Attachment (+) Button */}
         <button
           type="button"
-          onClick={handleSubmit}
-          disabled={!text.trim() || isLoading || disabled}
-          className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-brand hover:brightness-110 disabled:opacity-40 disabled:hover:brightness-100 text-white font-semibold text-xs shadow-md shadow-brand-500/20 transition-all cursor-pointer disabled:cursor-not-allowed active:scale-95"
-          aria-label="Send message"
+          onClick={onAttachClick}
+          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center transition-colors font-bold text-sm"
+          title="Filter by document or attach file"
+          aria-label="Filter documents"
         >
-          {isLoading ? (
-            <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              <span>Thinking...</span>
-            </>
-          ) : (
-            <>
-              <span>Send</span>
-              <Send className="w-3.5 h-3.5" />
-            </>
-          )}
+          <Plus className="w-4 h-4 stroke-[2.5]" />
         </button>
+
+        {/* Right: Audio Waveform & Send Button */}
+        <div className="flex items-center gap-2">
+          <div className="text-gray-400 text-xs px-2 select-none font-mono" title="Voice assistant ready">
+            ılılı
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!hasContent || isLoading || disabled}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm active:scale-95 ${
+              hasContent
+                ? 'bg-[#111215] text-white hover:bg-black ring-2 ring-[#b6f526]'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+            aria-label="Send message"
+            id="chat-send-btn"
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-gray-600" />
+            ) : (
+              <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   )

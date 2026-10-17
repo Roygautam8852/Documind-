@@ -6,29 +6,53 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand palette — indigo/violet with neutral charcoal backgrounds
+        // Neon lime accent palette (matching the design in user image)
+        neon: {
+          50:  '#f7fee7',
+          100: '#ecfccb',
+          200: '#d9f99d',
+          300: '#bef264',
+          400: '#a3e635',
+          500: '#b6f526',
+          DEFAULT: '#b6f526',
+          600: '#90d115',
+          700: '#4d7c0f',
+          800: '#3f6212',
+          900: '#365314',
+        },
+        // Echo theme colors
+        echo: {
+          dark: '#111215',
+          sidebar: '#16171b',
+          cardDark: '#1c1e24',
+          borderDark: '#262933',
+          canvas: '#f4f5f7',
+          cardLight: '#ffffff',
+          borderLight: '#e5e7eb',
+        },
+        // Brand palette — neon-forward with neutral charcoal backgrounds
         brand: {
-          50:  '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+          50:  '#f7fee7',
+          100: '#ecfccb',
+          200: '#d9f99d',
+          300: '#bef264',
+          400: '#a3e635',
+          500: '#b6f526',
+          600: '#94db12',
+          700: '#7bb80d',
+          800: '#5e8d0a',
+          900: '#365314',
+          950: '#111215',
         },
         // Dark surface palette
         surface: {
-          0:   '#0f0f12',   // deepest background
-          50:  '#17171c',   // page background
-          100: '#1e1e26',   // card background
-          200: '#252530',   // elevated card
-          300: '#2e2e3d',   // border / divider
-          400: '#3d3d52',   // subtle muted
-          500: '#6b6b88',   // muted text
+          0:   '#0d0e10',   // deepest obsidian
+          50:  '#111215',   // sidebar background
+          100: '#16171b',   // dark panels
+          200: '#1c1e24',   // elevated cards
+          300: '#262933',   // dividers
+          400: '#3c404d',   // subtle muted
+          500: '#7e8494',   // muted text
         },
       },
       fontFamily: {

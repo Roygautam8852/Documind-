@@ -20,20 +20,34 @@ export function MobileNav() {
   }
 
   return (
-    <header className="md:hidden sticky top-0 z-30 flex items-center justify-between gap-2 px-3 py-2 bg-surface-100 border-b border-surface-300">
-      <span className="text-sm font-bold text-white shrink-0">DocuMind</span>
-      <nav aria-label="Main navigation" className="flex items-center gap-1">
+    <header className="md:hidden sticky top-0 z-30 flex items-center justify-between gap-2 px-4 py-2.5 bg-[#111215] border-b border-[#202228]">
+      <span className="text-sm font-bold text-white shrink-0 tracking-tight flex items-center gap-2">
+        <span className="w-6 h-6 rounded-lg bg-[#b6f526] text-black flex items-center justify-center font-bold text-xs">D</span>
+        DocuMind
+      </span>
+      <nav aria-label="Main navigation" className="flex items-center gap-1.5">
         {links.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
             aria-label={label}
-            className={({ isActive }) => `p-2 rounded-md ${isActive ? 'text-brand-300 bg-brand-500/10' : 'text-slate-400'}`}
+            className={({ isActive }) =>
+              `p-2 rounded-xl transition-all ${
+                isActive
+                  ? 'text-black bg-[#b6f526] font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-[#1c1e24]'
+              }`
+            }
           >
             <Icon className="w-4 h-4" />
           </NavLink>
         ))}
-        <button type="button" onClick={signOut} aria-label="Sign out" className="p-2 rounded-md text-slate-400">
+        <button
+          type="button"
+          onClick={signOut}
+          aria-label="Sign out"
+          className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-[#1c1e24]"
+        >
           <LogOut className="w-4 h-4" />
         </button>
       </nav>

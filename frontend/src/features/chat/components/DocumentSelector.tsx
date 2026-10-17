@@ -13,8 +13,8 @@ export function DocumentSelector({ selectedDocId, onSelectDocId }: DocumentSelec
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-xs text-slate-400">
-        <div className="w-3.5 h-3.5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center gap-2 text-xs text-gray-400">
+        <div className="w-3.5 h-3.5 border-2 border-[#b6f526] border-t-transparent rounded-full animate-spin" />
         <span>Loading library documents...</span>
       </div>
     )
@@ -22,15 +22,15 @@ export function DocumentSelector({ selectedDocId, onSelectDocId }: DocumentSelec
 
   if (readyDocs.length === 0) {
     return (
-      <div className="text-xs text-amber-400/90 flex items-center gap-1.5 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
-        <span>No processed documents available. Upload documents in the library to query them.</span>
+      <div className="text-xs text-amber-700 flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200">
+        <span>No processed documents available. Upload documents in library to query them.</span>
       </div>
     )
   }
 
   return (
     <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-none">
-      <span className="text-xs font-medium text-slate-400 whitespace-nowrap flex items-center gap-1">
+      <span className="text-xs font-bold text-gray-500 whitespace-nowrap flex items-center gap-1 uppercase tracking-wider">
         Scope:
       </span>
 
@@ -38,15 +38,15 @@ export function DocumentSelector({ selectedDocId, onSelectDocId }: DocumentSelec
       <button
         type="button"
         onClick={() => onSelectDocId(null)}
-        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95 ${
           selectedDocId === null
-            ? 'bg-brand-500/20 text-brand-300 border border-brand-500/40 shadow-sm'
-            : 'bg-surface-200 text-slate-400 hover:text-slate-200 hover:bg-surface-300 border border-surface-300'
+            ? 'bg-[#b6f526] text-black shadow-sm'
+            : 'bg-white text-gray-600 hover:text-black hover:bg-gray-100 border border-gray-200'
         }`}
       >
-        <Layers className="w-3 h-3" />
+        <Layers className="w-3.5 h-3.5" />
         <span>All Documents ({readyDocs.length})</span>
-        {selectedDocId === null && <Check className="w-3 h-3 text-brand-400" />}
+        {selectedDocId === null && <Check className="w-3 h-3 text-black stroke-[3]" />}
       </button>
 
       {/* Specific Document Pills */}
@@ -57,16 +57,16 @@ export function DocumentSelector({ selectedDocId, onSelectDocId }: DocumentSelec
             key={doc.id}
             type="button"
             onClick={() => onSelectDocId(isSelected ? null : doc.id)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium max-w-[200px] truncate transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold max-w-[200px] truncate transition-all active:scale-95 ${
               isSelected
-                ? 'bg-brand-500/20 text-brand-300 border border-brand-500/40 shadow-sm'
-                : 'bg-surface-200 text-slate-400 hover:text-slate-200 hover:bg-surface-300 border border-surface-300'
+                ? 'bg-[#b6f526] text-black shadow-sm'
+                : 'bg-white text-gray-600 hover:text-black hover:bg-gray-100 border border-gray-200'
             }`}
             title={doc.original_filename}
           >
-            <FileText className="w-3 h-3 flex-shrink-0" />
+            <FileText className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="truncate">{doc.original_filename}</span>
-            {isSelected && <Check className="w-3 h-3 text-brand-400 flex-shrink-0" />}
+            {isSelected && <Check className="w-3 h-3 text-black flex-shrink-0 stroke-[3]" />}
           </button>
         )
       })}
