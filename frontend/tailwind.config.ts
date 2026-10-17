@@ -20,7 +20,16 @@ const config: Config = {
           800: '#3f6212',
           900: '#365314',
         },
-        // Echo theme colors
+        // DocuMind theme colors
+        documind: {
+          dark: '#111215',
+          sidebar: '#16171b',
+          cardDark: '#1c1e24',
+          borderDark: '#262933',
+          canvas: '#f4f5f7',
+          cardLight: '#ffffff',
+          borderLight: '#e5e7eb',
+        },
         echo: {
           dark: '#111215',
           sidebar: '#16171b',

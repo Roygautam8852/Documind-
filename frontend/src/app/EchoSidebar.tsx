@@ -246,3 +246,6 @@ export function EchoSidebar({
     </aside>
   )
 }
+
+export const DocuMindSidebar = EchoSidebar
+

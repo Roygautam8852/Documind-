@@ -48,9 +48,9 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-gray-200 shadow-sm text-xs font-semibold text-gray-800">
             <span className="w-2 h-2 rounded-full bg-[#b6f526]" />
-            <span className="font-mono text-gray-500">EchoAI Architecture</span>
+            <span className="font-mono text-gray-500">DocuMind Intelligence</span>
             <span className="text-gray-300">•</span>
-            <span>RAG-Powered Document Intelligence</span>
+            <span>RAG-Powered Document Workspace</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight">
