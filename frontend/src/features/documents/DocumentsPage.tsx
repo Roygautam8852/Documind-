@@ -61,49 +61,76 @@ export function DocumentsPage() {
       </div>
 
       {/* ── Main content ─────────────────────────────────────────────── */}
-      <div className="ml-0 md:ml-64 p-4 sm:p-8">
+      <div className="ml-0 md:ml-64 p-4 sm:p-8 bg-ambient min-h-screen">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="heading-lg text-white">Document Library</h1>
-              <p className="text-muted text-sm mt-1">
-                Upload and manage your documents for AI question answering and knowledge extraction
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-500/10 text-brand-300 border border-brand-500/20 mb-2">
+                Knowledge Base & Vector Index
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Document Library</h1>
+              <p className="text-slate-400 text-sm mt-1">
+                Upload and manage your documents for AI question answering, semantic search, and citations.
               </p>
             </div>
-            <button
-              onClick={() => setIsUploadOpen(!isUploadOpen)}
-              className="btn-primary flex items-center gap-2 self-start sm:self-auto"
-              id="toggle-upload-btn"
-            >
-              {isUploadOpen ? (
-                <>Close Upload</>
-              ) : (
-                <>
-                  <Upload className="w-4 h-4" />
-                  Upload document
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/chat"
+                className="btn-secondary flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-200/80 hover:bg-surface-200 border border-white/[0.08] text-white"
+              >
+                <MessageSquare className="w-4 h-4 text-brand-300" />
+                Ask AI
+              </Link>
+              <button
+                onClick={() => setIsUploadOpen(!isUploadOpen)}
+                className="btn-primary flex items-center gap-2 shadow-lg shadow-brand-500/20 px-5 py-2.5 rounded-xl font-medium"
+                id="toggle-upload-btn"
+              >
+                {isUploadOpen ? (
+                  <>Close Upload</>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    Upload document
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Quick Metrics Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="card p-4">
-              <span className="text-xs text-muted block mb-1">Total Documents</span>
-              <span className="text-2xl font-bold text-white">{total}</span>
+            <div className="card-premium p-4">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Total Documents</span>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-extrabold text-white">{total}</span>
+                <span className="text-xs text-brand-400 font-medium">Uploaded</span>
+              </div>
             </div>
-            <div className="card p-4">
-              <span className="text-xs text-muted block mb-1">Ready for Chat</span>
-              <span className="text-2xl font-bold text-emerald-400">{readyCount}</span>
+            <div className="card-premium p-4">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Ready for Chat</span>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-extrabold text-emerald-400">{readyCount}</span>
+                <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Indexed
+                </span>
+              </div>
             </div>
-            <div className="card p-4">
-              <span className="text-xs text-muted block mb-1">Processing</span>
-              <span className="text-2xl font-bold text-blue-400">{processingCount}</span>
+            <div className="card-premium p-4">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Processing</span>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-extrabold text-blue-400">{processingCount}</span>
+                <span className="text-xs text-blue-400 font-medium">Embedding</span>
+              </div>
             </div>
-            <div className="card p-4">
-              <span className="text-xs text-muted block mb-1">Failed</span>
-              <span className="text-2xl font-bold text-rose-400">{failedCount}</span>
+            <div className="card-premium p-4">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Failed</span>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-extrabold text-rose-400">{failedCount}</span>
+                <span className="text-xs text-slate-500 font-medium">{failedCount > 0 ? 'Action required' : 'None'}</span>
+              </div>
             </div>
           </div>
 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   FileText,
   FileCode,
@@ -14,6 +15,7 @@ import {
   Info,
   Sparkles,
   Layers,
+  MessageSquare,
 } from 'lucide-react'
 import { useDocuments, useDeleteDocument, useRetryDocument } from '../api'
 import { formatBytes } from '@/lib/formatters'
@@ -305,15 +307,25 @@ export function DocumentList({ onOpenUpload }: DocumentListProps) {
                         </button>
                       )}
                       {doc.status === 'ready' && (
-                        <button
-                          type="button"
-                          onClick={() => setDocumentToSummarize(doc)}
-                          className="p-1.5 text-brand-400 hover:text-brand-300 hover:bg-brand-500/10 rounded-lg transition-colors"
-                          title="Summarize document"
-                          aria-label={`Summarize ${doc.original_filename}`}
-                        >
-                          <Sparkles className="w-4 h-4" />
-                        </button>
+                        <>
+                          <Link
+                            to={`/chat?docId=${doc.id}`}
+                            className="p-1.5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                            title="Chat with this document"
+                            aria-label={`Chat with ${doc.original_filename}`}
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => setDocumentToSummarize(doc)}
+                            className="p-1.5 text-brand-400 hover:text-brand-300 hover:bg-brand-500/10 rounded-lg transition-colors"
+                            title="Summarize document"
+                            aria-label={`Summarize ${doc.original_filename}`}
+                          >
+                            <Sparkles className="w-4 h-4" />
+                          </button>
+                        </>
                       )}
                       <button
                         onClick={() => setDocumentToDelete(doc)}

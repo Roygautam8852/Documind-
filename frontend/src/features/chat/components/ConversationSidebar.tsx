@@ -19,12 +19,12 @@ export function ConversationSidebar({
   onDeleteConversation,
 }: ConversationSidebarProps) {
   return (
-    <div className="w-72 bg-surface-100 border-r border-surface-300 flex flex-col h-full select-none">
+    <div className="w-72 bg-surface-100/90 border-r border-white/[0.08] flex flex-col h-full select-none backdrop-blur-md">
       {/* Header action: New Chat */}
-      <div className="p-3 border-b border-surface-300">
+      <div className="p-3 border-b border-white/[0.06]">
         <button
           onClick={onNewChat}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white font-medium text-sm transition-colors shadow-sm"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-brand hover:brightness-110 text-white font-semibold text-sm transition-all shadow-md shadow-brand-500/25 active:scale-95"
           aria-label="Start a new chat"
         >
           <MessageSquarePlus className="w-4 h-4" />
@@ -34,21 +34,24 @@ export function ConversationSidebar({
 
       {/* Conversations list */}
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
-        <div className="px-2 py-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          Chat History
+        <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+          <span>Recent Conversations</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-200/80 text-slate-400">{conversations.length}</span>
         </div>
 
         {isLoading ? (
           <div className="space-y-2 p-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-10 rounded-lg bg-surface-200/50 animate-pulse" />
+              <div key={i} className="h-10 rounded-xl bg-surface-200/50 animate-pulse" />
             ))}
           </div>
         ) : conversations.length === 0 ? (
-          <div className="text-center py-8 px-4 text-slate-500 text-xs">
-            <MessageSquare className="w-6 h-6 mx-auto mb-2 text-slate-600 opacity-60" />
-            <p>No previous conversations.</p>
-            <p className="mt-1 text-[11px] text-slate-600">Start asking questions to create one.</p>
+          <div className="text-center py-10 px-4 text-slate-500 text-xs">
+            <div className="w-10 h-10 rounded-xl bg-surface-200/60 flex items-center justify-center mx-auto mb-2 text-slate-400">
+              <MessageSquare className="w-5 h-5 opacity-60" />
+            </div>
+            <p className="font-medium text-slate-400">No previous conversations.</p>
+            <p className="mt-1 text-[11px] text-slate-500">Ask a question to begin a thread.</p>
           </div>
         ) : (
           conversations.map((conv) => {
@@ -63,9 +66,9 @@ export function ConversationSidebar({
               <div
                 key={conv.id}
                 onClick={() => onSelectConversation(conv.id)}
-                className={`group relative flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-sm transition-colors cursor-pointer ${
+                className={`group relative flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-brand-500/15 text-white font-medium border border-brand-500/30'
+                    ? 'bg-gradient-to-r from-brand-500/20 via-brand-500/10 to-transparent text-white font-medium border border-brand-500/30 shadow-sm shadow-brand-500/10'
                     : 'text-slate-300 hover:bg-surface-200/70 hover:text-white'
                 }`}
               >

@@ -155,22 +155,67 @@ body {
   @apply rounded;
 }
 
-/* ── Gradient text ───────────────────────────────────────────────────────── */
+/* ── Gradient text & Accents ─────────────────────────────────────────────── */
 .gradient-text {
-  @apply bg-gradient-to-r from-brand-400 to-violet-400 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-brand-400 via-indigo-300 to-violet-400 bg-clip-text text-transparent;
 }
 
-/* ── Glassmorphism panel ─────────────────────────────────────────────────── */
+.gradient-text-emerald {
+  @apply bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent;
+}
+
+.gradient-text-amber {
+  @apply bg-gradient-to-r from-amber-400 to-orange-300 bg-clip-text text-transparent;
+}
+
+/* ── Modern Glassmorphism & Cards ────────────────────────────────────────── */
 .glass {
-  @apply backdrop-blur-md bg-surface-100/80 border border-surface-300/50;
+  @apply backdrop-blur-xl bg-surface-100/70 border border-white/[0.08] shadow-xl shadow-black/20;
+}
+
+.glass-subtle {
+  @apply backdrop-blur-md bg-surface-100/40 border border-white/[0.05];
+}
+
+.card-premium {
+  @apply relative overflow-hidden rounded-2xl bg-gradient-to-b from-surface-100/90 to-surface-100/40
+         border border-white/[0.08] shadow-lg shadow-black/20 backdrop-blur-md
+         transition-all duration-300 hover:border-brand-500/40 hover:shadow-brand-500/10 hover:-translate-y-0.5;
+}
+
+.card-glow {
+  @apply relative rounded-2xl bg-surface-100/80 border border-surface-300/80
+         before:absolute before:-inset-px before:rounded-2xl before:bg-gradient-to-r before:from-brand-500/20 before:to-violet-500/20
+         before:opacity-0 hover:before:opacity-100 before:transition-opacity before:-z-10;
+}
+
+/* ── Glow indicators ─────────────────────────────────────────────────────── */
+.glow-emerald {
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
+}
+
+.glow-brand {
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
 }
 
 /* ── Prose override for AI answers ──────────────────────────────────────── */
 .prose-answer {
   @apply prose prose-invert prose-sm max-w-none
-         prose-headings:text-white prose-headings:font-semibold
-         prose-p:text-slate-300 prose-p:leading-relaxed
-         prose-li:text-slate-300
-         prose-code:text-brand-300 prose-code:bg-surface-200 prose-code:px-1 prose-code:rounded
-         prose-pre:bg-surface-200 prose-pre:border prose-pre:border-surface-300;
+         prose-headings:text-white prose-headings:font-bold prose-headings:tracking-tight
+         prose-h3:text-base prose-h3:mt-3 prose-h3:mb-1.5 prose-h3:text-brand-300
+         prose-h4:text-sm prose-h4:text-slate-200
+         prose-p:text-slate-200 prose-p:leading-relaxed prose-p:my-1.5
+         prose-ul:my-1.5 prose-ul:pl-4 prose-li:my-0.5 prose-li:text-slate-200
+         prose-strong:text-white prose-strong:font-semibold
+         prose-code:text-brand-300 prose-code:bg-surface-300/60 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-xs
+         prose-pre:bg-surface-200/90 prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl;
 }
+
+/* ── Ambient Radial Background ──────────────────────────────────────────── */
+.bg-ambient {
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.04) 0%, transparent 50%);
+}
+

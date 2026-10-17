@@ -57,32 +57,86 @@ export function DashboardPage() {
       </div>
 
       {/* ── Main content ─────────────────────────────────────────────── */}
-      <div className="ml-0 md:ml-64 p-4 sm:p-8">
+      <div className="ml-0 md:ml-64 p-4 sm:p-8 bg-ambient min-h-screen">
         <div className="max-w-5xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="heading-lg text-white">Dashboard</h1>
-              <p className="text-muted text-sm mt-1">Your document intelligence workspace</p>
+          {/* Header Banner */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-900/40 via-surface-100/80 to-surface-100/90 border border-white/[0.08] p-6 sm:p-8 backdrop-blur-xl shadow-xl shadow-black/20">
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Gemini 3.8 Flash AI Engine Active
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                  Welcome to <span className="gradient-text">DocuMind</span>
+                </h1>
+                <p className="text-slate-300 text-sm max-w-lg leading-relaxed">
+                  Your document intelligence workspace. Upload documents, run semantic retrieval, and get answers with verifiable citations.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsUploadOpen(!isUploadOpen)}
+                  className="btn-primary flex items-center gap-2 shadow-lg shadow-brand-500/25 px-5 py-2.5 rounded-xl font-medium"
+                  id="upload-button"
+                >
+                  <Upload className="w-4 h-4" />
+                  Upload document
+                </button>
+                <Link
+                  to="/chat"
+                  className="btn-secondary flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-200/80 hover:bg-surface-200 border border-white/[0.08] text-white"
+                >
+                  <MessageSquare className="w-4 h-4 text-brand-300" />
+                  Open Chat
+                </Link>
+              </div>
             </div>
-            <button
-              onClick={() => setIsUploadOpen(!isUploadOpen)}
-              className="btn-primary flex items-center gap-2"
-              id="upload-button"
-            >
-              <Upload className="w-4 h-4" />
-              Upload document
-            </button>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 gap-4 max-w-sm">
-            <Link to="/documents" className="card p-5 hover:border-brand-500/40 transition-colors">
+          {/* Stats Overview */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link to="/documents" className="card-premium p-5 group">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-muted">Documents</span>
-                <FileText className="w-4 h-4 text-brand-400" />
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Documents</span>
+                <div className="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 group-hover:scale-110 transition-transform">
+                  <FileText className="w-4 h-4" />
+                </div>
               </div>
-              <div className="text-2xl font-bold text-white">{documentCount}</div>
+              <div className="text-3xl font-extrabold text-white">{documentCount}</div>
+              <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                <span>View library</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </p>
+            </Link>
+
+            <Link to="/chat" className="card-premium p-5 group">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">RAG Pipeline</span>
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                  <Brain className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-3xl font-extrabold text-emerald-400">Ready</div>
+              <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                <span>Hybrid Search + Citations</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </p>
+            </Link>
+
+            <Link to="/documents" className="card-premium p-5 group">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vector Store</span>
+                <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400 group-hover:scale-110 transition-transform">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-3xl font-extrabold text-white">ChromaDB</div>
+              <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                <span>Persistent embeddings indexed</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </p>
             </Link>
           </div>
 
@@ -101,9 +155,12 @@ export function DashboardPage() {
           {/* Documents Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="heading-md text-white text-lg font-semibold">Your Documents</h2>
+              <div>
+                <h2 className="heading-md text-white text-lg font-bold">Document Library</h2>
+                <p className="text-xs text-slate-400 mt-0.5">Manage and query your uploaded files</p>
+              </div>
               {hasDocuments && (
-                <Link to="/documents" className="text-brand-400 hover:text-brand-300 text-sm font-medium">
+                <Link to="/documents" className="text-brand-400 hover:text-brand-300 text-sm font-medium transition-colors">
                   View all documents →
                 </Link>
               )}

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { Brain, BookOpen, FileText, MessageSquare, Sparkles, RefreshCw } from 'lucide-react'
 import { ChatMessage, Citation } from './types'
@@ -14,10 +14,18 @@ import { AccountControl } from '@/features/auth/AccountControl'
 import { MobileNav } from '@/app/MobileNav'
 
 export function ChatPage() {
+  const [searchParams] = useSearchParams()
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null)
   const [activeCitation, setActiveCitation] = useState<Citation | null>(null)
+
+  useEffect(() => {
+    const docId = searchParams.get('docId')
+    if (docId) {
+      setSelectedDocId(docId)
+    }
+  }, [searchParams])
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
@@ -183,9 +191,10 @@ export function ChatPage() {
           {/* Top Header */}
           <header className="h-16 border-b border-surface-300 px-6 flex items-center justify-between bg-surface-50/80 backdrop-blur-sm z-10 flex-shrink-0">
             <div className="flex items-center gap-3">
-              <h1 className="font-semibold text-lg text-white">Chat Intelligence</h1>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-300 border border-brand-500/20 font-medium">
-                RAG Pipeline v1
+              <h1 className="font-bold text-lg text-white">Chat Intelligence</h1>
+              <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                Gemini 3.8 Flash
               </span>
             </div>
 
@@ -194,7 +203,7 @@ export function ChatPage() {
                 <button
                   type="button"
                   onClick={() => setMessages([])}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-surface-200 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs text-slate-300 hover:text-white bg-surface-200/60 hover:bg-surface-200 border border-white/[0.05] transition-all"
                   title="Clear current conversation view"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
@@ -205,7 +214,7 @@ export function ChatPage() {
           </header>
 
           {/* Scope Selector Bar */}
-          <div className="px-6 py-2.5 border-b border-surface-300/50 bg-surface-100/40 flex-shrink-0">
+          <div className="px-6 py-2.5 border-b border-surface-300/40 bg-surface-100/30 flex-shrink-0">
             <DocumentSelector
               selectedDocId={selectedDocId}
               onSelectDocId={setSelectedDocId}
@@ -213,43 +222,64 @@ export function ChatPage() {
           </div>
 
           {/* Message Stream */}
-          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-4 bg-ambient">
             {messages.length === 0 ? (
               /* Empty State */
-              <div className="max-w-2xl mx-auto py-12 text-center space-y-6">
-                <div className="w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center mx-auto text-brand-400">
-                  <Sparkles className="w-7 h-7" />
+              <div className="max-w-2xl mx-auto py-10 text-center space-y-6 animate-fade-in">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-brand/10 border border-brand-500/30 flex items-center justify-center mx-auto text-brand-400 shadow-xl shadow-brand-500/10">
+                  <Sparkles className="w-8 h-8 text-brand-400" />
                 </div>
 
                 <div className="space-y-2">
-                  <h2 className="text-xl font-bold text-white">
-                    Ask questions about your uploaded documents
+                  <h2 className="text-2xl font-bold text-white tracking-tight">
+                    Ask anything about your documents
                   </h2>
                   <p className="text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-                    DocuMind retrieves relevant document excerpts, performs semantic search, and
-                    synthesizes answers with verifiable, clickable source citations.
+                    Powered by semantic hybrid search and Gemini 3.8 Flash. Every claim is verified with clickable citations.
                   </p>
                 </div>
 
-                {/* Suggestions */}
-                <div className="pt-4 space-y-2 max-w-lg mx-auto">
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                    Try asking:
+                {/* Suggestions Grid */}
+                <div className="pt-4 space-y-3 max-w-xl mx-auto">
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block text-left pl-1">
+                    Quick suggestions:
                   </span>
-                  <div className="grid gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left">
                     {[
-                      'What are the key points in this document?',
-                      'Explain the architectural methodology and pipeline.',
-                      'Summarize the core requirements and conclusions.',
-                    ].map((suggestion, i) => (
+                      {
+                        title: 'Summarize Document',
+                        desc: 'Full breakdown of key skills, projects & achievements',
+                        prompt: 'Summarize this document and highlight the key skills and projects.',
+                      },
+                      {
+                        title: 'Interview Pitch',
+                        desc: 'Prepare a professional talking pitch for interviews',
+                        prompt: 'I want to prepare my top project for an interview. How should I introduce and speak about it?',
+                      },
+                      {
+                        title: 'Extract Core Skills',
+                        desc: 'List languages, frameworks, databases, and tools',
+                        prompt: 'What are all the technical skills, programming languages, and tools mentioned in my document?',
+                      },
+                      {
+                        title: 'Verify Candidate Details',
+                        desc: 'Extract contact info, university, and credentials',
+                        prompt: 'What is my name, contact email, phone number, and educational background from my CV?',
+                      },
+                    ].map((item, i) => (
                       <button
                         key={i}
                         type="button"
-                        onClick={() => handleSuggestion(suggestion)}
-                        className="text-left px-4 py-2.5 rounded-xl bg-surface-100 hover:bg-surface-200 border border-surface-300 text-sm text-slate-300 hover:text-white transition-all shadow-sm flex items-center justify-between group"
+                        onClick={() => handleSuggestion(item.prompt)}
+                        className="p-3.5 rounded-2xl bg-surface-100/70 hover:bg-surface-100 border border-white/[0.08] hover:border-brand-500/40 text-left transition-all duration-200 hover:-translate-y-0.5 shadow-md shadow-black/20 group"
                       >
-                        <span>{suggestion}</span>
-                        <Brain className="w-4 h-4 text-slate-500 group-hover:text-brand-400 transition-colors" />
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-sm text-slate-200 group-hover:text-brand-300 transition-colors">
+                            {item.title}
+                          </span>
+                          <Brain className="w-3.5 h-3.5 text-slate-500 group-hover:text-brand-400 transition-colors" />
+                        </div>
+                        <p className="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
                       </button>
                     ))}
                   </div>
