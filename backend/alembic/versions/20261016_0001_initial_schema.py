@@ -2,23 +2,27 @@
 
 from __future__ import annotations
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision: str = "20261016_0001"
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
     op.create_table(
         "users",
         sa.Column("id", sa.String(length=36), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.Column("email", sa.String(length=320), nullable=False),
         sa.Column("password_hash", sa.String(length=255), nullable=False),
         sa.PrimaryKeyConstraint("id"),
@@ -29,8 +33,12 @@ def upgrade() -> None:
     op.create_table(
         "conversations",
         sa.Column("id", sa.String(length=36), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.Column("owner_id", sa.String(length=36), nullable=False),
         sa.Column("title", sa.String(length=512), nullable=True),
         sa.ForeignKeyConstraint(["owner_id"], ["users.id"], ondelete="CASCADE"),
@@ -41,8 +49,12 @@ def upgrade() -> None:
     op.create_table(
         "documents",
         sa.Column("id", sa.String(length=36), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.Column("owner_id", sa.String(length=36), nullable=False),
         sa.Column("original_filename", sa.String(length=512), nullable=False),
         sa.Column("stored_object_key", sa.String(length=1024), nullable=False),
@@ -72,7 +84,9 @@ def upgrade() -> None:
         sa.Column("token_count", sa.Integer(), nullable=True),
         sa.Column("vector_id", sa.String(length=256), nullable=True),
         sa.Column("metadata", sa.JSON(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.ForeignKeyConstraint(["document_id"], ["documents.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["owner_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
@@ -91,7 +105,9 @@ def upgrade() -> None:
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("citations", sa.JSON(), nullable=False),
         sa.Column("retrieval_metadata", sa.JSON(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.ForeignKeyConstraint(["conversation_id"], ["conversations.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["owner_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import threading
 from collections import defaultdict
+from collections.abc import Awaitable, Callable
 from time import perf_counter
 from typing import Any
 
@@ -53,7 +54,9 @@ http_metrics = HttpMetrics()
 class HttpMetricsMiddleware(BaseHTTPMiddleware):
     """Record method, route template, status and elapsed time per request."""
 
-    async def dispatch(self, request: Request, call_next: Any) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         started = perf_counter()
         response = await call_next(request)
         duration_ms = (perf_counter() - started) * 1000

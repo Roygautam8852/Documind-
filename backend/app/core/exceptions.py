@@ -166,7 +166,9 @@ class RateLimitError(DocuMindError):
 class StorageQuotaExceededError(DocuMindError):
     status_code = 409
     error_code = "storage_quota_exceeded"
-    message = "Your document storage quota has been reached. Delete a document before uploading another."
+    message = (
+        "Your document storage quota has been reached. Delete a document before uploading another."
+    )
 
 
 # ── Conflict ─────────────────────────────────────────────────────────────────

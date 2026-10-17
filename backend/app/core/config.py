@@ -126,7 +126,10 @@ class Settings(BaseSettings):
                 "CHANGE_ME_to_a_long_random_secret_string",
                 "dev-only-secret-change-in-production",
             ):
-                raise ValueError("JWT_SECRET must be a unique random value of at least 64 characters in production")
+                raise ValueError(
+                    "JWT_SECRET must be a unique random value of at least 64 "
+                    "characters in production"
+                )
             if self.llm_provider == "mock":
                 raise ValueError("LLM_PROVIDER must use a configured provider in production")
             if not self.llm_api_key:

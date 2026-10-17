@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
+
 async def _register_and_login(
     client: AsyncClient, email: str, password: str = "testpass123"
 ) -> str:
@@ -30,8 +31,10 @@ async def _register_and_login(
     assert resp.status_code == 201, resp.text
     return resp.json()["access_token"]
 
+
 def _auth(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
+
 
 def _fake_pdf(content: str = "Hello PDF world. This is a test document.") -> bytes:
     """Return minimal valid PDF bytes."""
@@ -51,8 +54,10 @@ def _fake_pdf(content: str = "Hello PDF world. This is a test document.") -> byt
         b"trailer<</Size 6/Root 1 0 R>>\nstartxref\n406\n%%EOF"
     )
 
+
 def _fake_txt(content: str = "Line one.\nLine two.\nLine three.") -> bytes:
     return content.encode("utf-8")
+
 
 def _fake_docx() -> bytes:
     """Return a minimal valid DOCX file bytes."""
@@ -69,7 +74,9 @@ def _fake_docx() -> bytes:
     except ImportError:
         pytest.skip("python-docx not installed")
 
+
 # ── Upload tests ───────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_upload_txt_returns_202(client: AsyncClient, tmp_path: Path) -> None:
@@ -98,6 +105,7 @@ async def test_upload_txt_returns_202(client: AsyncClient, tmp_path: Path) -> No
     assert data["original_filename"] == "sample.txt"
     assert "id" in data
 
+
 @pytest.mark.asyncio
 async def test_upload_requires_auth(client: AsyncClient) -> None:
     resp = await client.post(
@@ -105,6 +113,7 @@ async def test_upload_requires_auth(client: AsyncClient) -> None:
         files={"file": ("a.txt", _fake_txt(), "text/plain")},
     )
     assert resp.status_code == 401
+
 
 @pytest.mark.asyncio
 async def test_upload_rejected_extension(client: AsyncClient, tmp_path: Path) -> None:
@@ -126,6 +135,7 @@ async def test_upload_rejected_extension(client: AsyncClient, tmp_path: Path) ->
         )
     assert resp.status_code == 415
     assert resp.json()["error_code"] == "unsupported_file_type"
+
 
 @pytest.mark.asyncio
 async def test_upload_empty_file_rejected(client: AsyncClient, tmp_path: Path) -> None:
@@ -172,7 +182,9 @@ async def test_upload_rejects_content_that_does_not_match_extension(
     assert response.status_code == 422
     assert response.json()["error_code"] == "malformed_file"
 
+
 # ── List tests ─────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_list_documents_empty(client: AsyncClient) -> None:
@@ -183,12 +195,15 @@ async def test_list_documents_empty(client: AsyncClient) -> None:
     assert data["total"] == 0
     assert data["items"] == []
 
+
 @pytest.mark.asyncio
 async def test_list_documents_requires_auth(client: AsyncClient) -> None:
     resp = await client.get("/api/v1/documents")
     assert resp.status_code == 401
 
+
 # ── Get tests ──────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_nonexistent_document_returns_404(client: AsyncClient) -> None:
@@ -198,6 +213,7 @@ async def test_get_nonexistent_document_returns_404(client: AsyncClient) -> None
         headers=_auth(token),
     )
     assert resp.status_code == 404
+
 
 @pytest.mark.asyncio
 async def test_cross_user_document_access_prevented(client: AsyncClient, tmp_path: Path) -> None:
@@ -231,7 +247,9 @@ async def test_cross_user_document_access_prevented(client: AsyncClient, tmp_pat
     resp = await client.get(f"/api/v1/documents/{doc_id}", headers=_auth(token_b))
     assert resp.status_code == 404, "Cross-user document access was not prevented!"
 
+
 # ── Delete tests ───────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_delete_nonexistent_returns_404(client: AsyncClient) -> None:
@@ -241,6 +259,7 @@ async def test_delete_nonexistent_returns_404(client: AsyncClient) -> None:
         headers=_auth(token),
     )
     assert resp.status_code == 404
+
 
 @pytest.mark.asyncio
 async def test_cross_user_delete_prevented(client: AsyncClient, tmp_path: Path) -> None:
@@ -271,7 +290,9 @@ async def test_cross_user_delete_prevented(client: AsyncClient, tmp_path: Path) 
     resp = await client.delete(f"/api/v1/documents/{doc_id}", headers=_auth(token_b))
     assert resp.status_code == 404, "Cross-user delete was not prevented!"
 
+
 # ── Error response format tests ────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_error_response_has_required_fields(client: AsyncClient) -> None:
@@ -290,7 +311,9 @@ async def test_error_response_has_required_fields(client: AsyncClient) -> None:
     assert "traceback" not in str(body)
     assert "sqlalchemy" not in str(body).lower()
 
+
 # ── Full lifecycle test ────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_upload_parse_list_delete_lifecycle(

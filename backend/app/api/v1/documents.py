@@ -104,7 +104,10 @@ async def upload_document(
     storage_limit = settings.max_user_storage_mb * 1024 * 1024
     if used_bytes + len(content) > storage_limit:
         raise StorageQuotaExceededError(
-            message="This upload would exceed your document storage quota. Delete a document before uploading."
+            message=(
+                "This upload would exceed your document storage quota. "
+                "Delete a document before uploading."
+            )
         )
 
     _validate_file_content(extension, content)

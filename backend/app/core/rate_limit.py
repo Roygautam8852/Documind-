@@ -5,6 +5,7 @@ from __future__ import annotations
 import threading
 import time
 from collections import defaultdict, deque
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -23,7 +24,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self._events: dict[tuple[str, str], deque[float]] = defaultdict(deque)
         self._last_cleanup = 0.0
 
-    async def dispatch(self, request: Request, call_next: Any) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         settings = get_settings()
         if settings.is_test or not settings.rate_limit_enabled:
             return await call_next(request)
@@ -50,7 +53,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         cutoff = now - 60
         with self._lock:
             if now - self._last_cleanup >= 60:
-                stale = [key for key, values in self._events.items() if not values or values[-1] <= cutoff]
+                stale = [
+                    key
+                    for key, values in self._events.items()
+                    if not values or values[-1] <= cutoff
+                ]
                 for stale_key in stale:
                     self._events.pop(stale_key, None)
                 self._last_cleanup = now

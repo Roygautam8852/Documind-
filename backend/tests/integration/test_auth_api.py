@@ -124,7 +124,7 @@ async def test_validation_response_does_not_echo_submitted_password(client: Asyn
     secret = "short-secret-value"
     response = await client.post(
         "/api/v1/auth/register",
-        json={"email": "invalid@example.com", "password": secret},
+        json={"email": "not-an-email", "password": secret},
     )
     assert response.status_code == 422
     assert secret not in response.text
