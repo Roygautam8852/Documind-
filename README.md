@@ -118,7 +118,9 @@ flowchart TB
 | Reranker | `none`, `mock`, `cross_encoder` | `none` |
 | File storage | `local` | `local` |
 
-The non-OpenAI LLM names are configuration aliases routed through the same OpenAI-compatible adapter. Set a compatible `LLM_BASE_URL` when the endpoint requires one; do not assume dedicated vendor SDK integrations. The local development Compose configuration uses mock LLM responses; switch to a configured provider for real model generation.
+The `google` setting routes through the OpenAI-compatible HTTP adapter using the configured `LLM_BASE_URL`; there is no separate Google SDK adapter. In this checkout, the root `.env` selects Google Gemini with `gemini-3.7-flash`, while `backend/.env` selects `gemini-3.8-flash`. Docker Compose loads the root `.env`; when running the backend from its directory, its `.env` is the relevant local settings file. API keys are intentionally not documented here.
+
+The checked-in `.env.example` files still default to `LLM_PROVIDER=mock` so a fresh setup does not need an external API key. Copying an example file does not configure Gemini automatically; set the provider, model, key, and compatible base URL in your local `.env` to use Gemini. The model shown in the frontend is currently a fixed display label and may not reflect changes to `LLM_MODEL`.
 
 ## Technology
 
@@ -193,7 +195,7 @@ Edit `.env` and replace the `JWT_SECRET` placeholder with a unique random value,
 docker compose up --build
 ```
 
-The development stack starts PostgreSQL, the API, and the Vite development server. The API container applies Alembic migrations before starting. With the checked-in defaults, the configured LLM adapter is `mock`, so it does not provide real model-generated answers.
+The development stack starts PostgreSQL, the API, and the Vite development server. The API container applies Alembic migrations before starting. It loads the root `.env`: in this checkout, that file configures Gemini (`gemini-3.7-flash`). A fresh copy of `.env.example` uses the mock adapter until you configure a real provider.
 
 | Service | Local address |
 |---|---|
@@ -255,8 +257,8 @@ The root `.env.example` is the Compose environment template. Configuration is lo
 | `APP_ENV` | `development`, `test`, or `production` behavior | `development` |
 | `DATABASE_URL` | Async SQLAlchemy connection string | Local PostgreSQL URL |
 | `JWT_SECRET` | JWT signing key; use a long, random production value | Placeholder; replace it |
-| `LLM_PROVIDER`, `LLM_MODEL` | LLM adapter and model identifier | `mock`, `gpt-4o-mini` |
-| `LLM_API_KEY`, `LLM_BASE_URL` | Provider credentials and optional compatible endpoint | Empty |
+| `LLM_PROVIDER`, `LLM_MODEL` | LLM adapter and model identifier | Example: `mock`, `gpt-4o-mini`; this checkout's root `.env`: `google`, `gemini-3.7-flash` |
+| `LLM_API_KEY`, `LLM_BASE_URL` | Provider credentials and optional compatible endpoint | Example values empty; this checkout uses a Gemini-compatible endpoint (key omitted) |
 | `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL` | Embedding implementation and model | `sentence_transformers`, `all-MiniLM-L6-v2` |
 | `VECTOR_STORE`, `CHROMA_PERSIST_DIR` | Vector store and persistence directory | `chroma`, `./data/chroma` |
 | `UPLOAD_DIR` | Uploaded file directory | `./data/uploads` |
