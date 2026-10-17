@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Brain, Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react'
+import { Brain, Eye, EyeOff, Loader2, ArrowRight, ArrowLeft } from 'lucide-react'
 import { apiClient, setAccessToken } from '@/lib/api-client'
 
 const schema = z.object({
@@ -39,7 +39,18 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#111215] flex flex-col items-center justify-center p-4 selection:bg-[#b6f526] selection:text-black">
+    <div className="min-h-screen bg-[#111215] flex flex-col items-center justify-center p-4 selection:bg-[#b6f526] selection:text-black relative">
+      {/* Top Left Back Button */}
+      <Link
+        to="/"
+        className="fixed top-6 left-6 flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#1c1e24] hover:bg-[#252830] border border-[#2d303a] text-slate-300 hover:text-white font-semibold text-xs transition-all shadow-md active:scale-95 z-20"
+        title="Back to Landing Page"
+        aria-label="Back to Landing Page"
+      >
+        <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
+        <span>Back to Home</span>
+      </Link>
+
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#b6f526]/5 rounded-full blur-3xl" />

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import {
   Brain,
@@ -8,6 +8,7 @@ import {
   Share2,
   Scale,
   Cpu,
+  ArrowLeft,
 } from 'lucide-react'
 import { ChatMessage, Citation } from './types'
 import { useChatQuery } from './api'
@@ -162,6 +163,16 @@ export function ChatPage() {
           {/* Top Bar */}
           <header className="h-16 border-b border-gray-200/80 px-4 sm:px-6 flex items-center justify-between flex-shrink-0 bg-white">
             <div className="flex items-center gap-3">
+              <Link
+                to="/"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-black font-semibold text-xs transition-all shadow-sm active:scale-95"
+                title="Back to Landing Page"
+                aria-label="Back to Landing Page"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span className="hidden sm:inline">Landing Page</span>
+              </Link>
+              <span className="text-gray-300">|</span>
               <div className="flex items-center gap-1.5 font-bold text-gray-900 text-sm">
                 <span>DocuMind 1.0</span>
                 <span className="text-xs text-gray-400">⌵</span>

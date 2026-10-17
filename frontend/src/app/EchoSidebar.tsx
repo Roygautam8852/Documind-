@@ -11,6 +11,7 @@ import {
   Trash2,
   ArrowUpRight,
   Sparkles,
+  ArrowLeft,
 } from 'lucide-react'
 import { useConversations, useDeleteConversation } from '@/features/chat/conversationsApi'
 import { AccountControl } from '@/features/auth/AccountControl'
@@ -61,14 +62,24 @@ export function EchoSidebar({
 
   return (
     <aside className="w-64 bg-[#111215] border-r border-[#202228] flex flex-col h-full text-slate-200 select-none flex-shrink-0">
-      {/* ── Brand Header ────────────────────────────────────────────── */}
+      {/* ── Brand Header with Back to Landing Icon ──────────────────── */}
       <div className="h-16 px-4 flex items-center justify-between border-b border-[#202228]">
-        <Link to="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-black font-bold shadow-sm transition-transform group-hover:scale-105">
-            <Brain className="w-4 h-4 text-black" />
-          </div>
-          <span className="font-bold text-white text-base tracking-tight">DocuMind</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/"
+            title="Back to Landing Page"
+            aria-label="Back to Landing Page"
+            className="p-1.5 rounded-xl bg-[#1c1e24] hover:bg-[#252830] text-slate-300 hover:text-white border border-[#2d303a] transition-all flex items-center justify-center hover:scale-105 active:scale-95"
+          >
+            <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
+          </Link>
+          <Link to="/dashboard" className="flex items-center gap-2 group">
+            <div className="w-7 h-7 rounded-xl bg-white flex items-center justify-center text-black font-bold shadow-sm transition-transform group-hover:scale-105">
+              <Brain className="w-4 h-4 text-black" />
+            </div>
+            <span className="font-bold text-white text-sm tracking-tight">DocuMind</span>
+          </Link>
+        </div>
         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#1c1e24] text-slate-400 border border-[#2a2d36]">
           v1.0
         </span>
@@ -138,6 +149,14 @@ export function EchoSidebar({
           >
             <MessageSquare className="w-3.5 h-3.5" />
             <span>Chat Intelligence</span>
+          </Link>
+
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16171b] transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Landing</span>
           </Link>
         </nav>
       </div>

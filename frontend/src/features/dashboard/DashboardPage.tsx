@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   Layers,
   ShieldCheck,
+  ArrowLeft,
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDocuments } from '@/features/documents/api'
@@ -47,6 +48,16 @@ export function DashboardPage() {
         {/* Top Header Bar */}
         <header className="h-16 bg-white border-b border-gray-200/80 px-6 sm:px-8 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-black font-semibold text-xs transition-all shadow-sm active:scale-95"
+              title="Back to Landing Page"
+              aria-label="Back to Landing Page"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span className="hidden sm:inline">Landing Page</span>
+            </Link>
+            <span className="text-gray-300">|</span>
             <div className="flex items-center gap-1.5 font-bold text-gray-900 text-sm cursor-pointer hover:text-black">
               <span>DocuMind 1.0</span>
               <span className="text-xs text-gray-400">⌵</span>
