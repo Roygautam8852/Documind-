@@ -39,32 +39,15 @@ export function LandingPage() {
             <span className="font-bold text-white text-lg tracking-tight">DocuMind</span>
           </Link>
           {isLoggedIn ? (
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center">
               <Link
                 to="/dashboard"
-                className="text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-xl hover:bg-[#1c1e24] transition-colors"
+                className="w-9 h-9 rounded-full bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold flex items-center justify-center text-xs shadow-sm transition-transform hover:scale-105 active:scale-95"
+                title={userProfile?.email ? `Logged in as ${userProfile.email}` : 'Go to Dashboard'}
               >
-                Dashboard
-              </Link>
-              <Link
-                to="/documents"
-                className="text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-xl hover:bg-[#1c1e24] transition-colors hidden sm:inline-block"
-              >
-                Documents
-              </Link>
-              <Link
-                to="/chat"
-                className="bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-sm px-4 py-2 rounded-xl transition-all shadow-sm shadow-[#b6f526]/20 active:scale-95 flex items-center gap-1.5"
-              >
-                <span>Go to Chat</span>
-                <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
-              </Link>
-              <Link
-                to="/dashboard"
-                className="w-8 h-8 rounded-full bg-[#1c1e24] hover:bg-[#252830] border border-[#2d303a] text-white font-bold flex items-center justify-center text-xs transition-colors"
-                title={userProfile?.email ?? 'Logged in'}
-              >
-                {userProfile?.email ? userProfile.email[0].toUpperCase() : 'U'}
+                {userProfile?.email
+                  ? userProfile.email.slice(0, 2).toUpperCase()
+                  : 'GA'}
               </Link>
             </div>
           ) : (
