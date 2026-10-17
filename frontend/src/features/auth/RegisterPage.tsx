@@ -211,12 +211,6 @@ export function RegisterPage() {
             </p>
           </div>
         </div>
-
-        <div className="text-center mt-6">
-          <Link to="/" className="text-xs text-slate-400 hover:text-white transition-colors">
-            ← Back to home
-          </Link>
-        </div>
       </div>
     </div>
   )
