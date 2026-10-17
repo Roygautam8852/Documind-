@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings, get_settings
 from app.core.exceptions import DocumentNotReadyError, NotFoundError
+from app.models.chunk import Chunk
 from app.models.conversation import Conversation
 from app.models.document import Document
 from app.models.message import Message
@@ -151,7 +152,9 @@ async def query_rag(
             doc_filename_map[doc.id] = doc.original_filename
 
         filter_doc_ids = unique_requested_ids
+        effective_top_k = max(cfg.top_k, min(len(unique_requested_ids) * 3, 25))
     else:
+        # All Documents scope: query across all ready documents for this user
         res = await db.execute(
             select(Document).where(
                 Document.owner_id == user_id,
@@ -174,7 +177,9 @@ async def query_rag(
 
         for doc in ready_docs:
             doc_filename_map[doc.id] = doc.original_filename
-        filter_doc_ids = list(doc_filename_map.keys())
+        # Passing None searches across all documents belonging to owner_id
+        filter_doc_ids = None
+        effective_top_k = max(cfg.top_k, min(len(ready_docs) * 3, 25))
 
     # 2. Query reformulation (for conversational coreferences)
     search_query = question
@@ -187,9 +192,11 @@ async def query_rag(
         query_vector=query_vector,
         owner_id=user_id,
         document_ids=filter_doc_ids,
-        top_k=cfg.top_k,
+        top_k=effective_top_k,
         score_threshold=cfg.similarity_threshold,
     )
+    if dense_results:
+        dense_results = [r for r in dense_results if r.document_id in doc_filename_map]
 
     # 4. Sparse lexical BM25 retrieval and Reciprocal Rank Fusion
     retrieval_strategy = "vector"
@@ -204,14 +211,16 @@ async def query_rag(
             query=search_query,
             owner_id=user_id,
             document_ids=filter_doc_ids,
-            top_k=cfg.top_k,
+            top_k=effective_top_k,
         )
+        if lexical_results:
+            lexical_results = [r for r in lexical_results if r.document_id in doc_filename_map]
 
         results = reciprocal_rank_fusion(
             dense_results=dense_results,
             lexical_results=lexical_results,
             k=cfg.hybrid_rrf_k,
-            top_k=cfg.top_k,
+            top_k=effective_top_k,
         )
     else:
         results = dense_results
@@ -222,7 +231,7 @@ async def query_rag(
         results = await reranker.rerank(
             query=search_query,
             candidates=results,
-            top_k=cfg.top_k,
+            top_k=effective_top_k,
         )
         reranked_flag = True
 
@@ -234,20 +243,57 @@ async def query_rag(
         reranked=reranked_flag,
     )
 
-    # 6. Abstention check
+    # 6. Abstention check with multi-document fallback
     if should_abstain(results, cfg.similarity_threshold):
-        logger.info(
-            "Abstaining on query: user=%s result_count=%d threshold=%.2f strategy=%s",
-            user_id,
-            len(results),
-            cfg.similarity_threshold,
-            retrieval_strategy,
+        # Cross-document fallback: if a user asks a general question across all documents
+        # or semantic similarity didn't exceed threshold, retrieve key chunks from each ready document
+        valid_doc_ids = list(doc_filename_map.keys())
+        fallback_stmt = (
+            select(Chunk)
+            .where(
+                Chunk.owner_id == user_id,
+                Chunk.document_id.in_(valid_doc_ids),
+            )
+            .order_by(Chunk.chunk_index)
+            .limit(effective_top_k)
         )
-        return await _persist_and_respond(
-            ans=ABSTENTION_MESSAGE,
-            citations_list=[],
-            retrieval_meta=retrieval_meta,
-        )
+        fb_res = await db.execute(fallback_stmt)
+        fb_chunks = list(fb_res.scalars().all())
+
+        if fb_chunks:
+            results = [
+                VectorSearchResult(
+                    chunk_id=c.id,
+                    document_id=c.document_id,
+                    owner_id=c.owner_id,
+                    text=c.text,
+                    score=0.9,
+                    page_number=c.page_number,
+                    chunk_index=c.chunk_index,
+                    metadata=dict(c.chunk_metadata or {}),
+                )
+                for c in fb_chunks
+            ]
+            retrieval_meta = RetrievalMeta(
+                result_count=len(results),
+                retrieval_strategy="multi_doc_context",
+                dense_count=len(dense_results),
+                lexical_count=len(lexical_results),
+                reranked=False,
+            )
+        else:
+            logger.info(
+                "Abstaining on query: user=%s result_count=%d threshold=%.2f strategy=%s",
+                user_id,
+                len(results),
+                cfg.similarity_threshold,
+                retrieval_strategy,
+            )
+            return await _persist_and_respond(
+                ans=ABSTENTION_MESSAGE,
+                citations_list=[],
+                retrieval_meta=retrieval_meta,
+            )
 
     # 7. Build prompt with source IDs and conversation context
     chunks_with_filenames = [(r, doc_filename_map.get(r.document_id, "document")) for r in results]

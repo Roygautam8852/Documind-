@@ -7,10 +7,7 @@ import {
   BookOpen,
   Search,
   Plus,
-  HelpCircle,
   Trash2,
-  ArrowUpRight,
-  Sparkles,
   ArrowLeft,
 } from 'lucide-react'
 import { useConversations, useDeleteConversation } from '@/features/chat/conversationsApi'
@@ -150,14 +147,6 @@ export function EchoSidebar({
             <MessageSquare className="w-3.5 h-3.5" />
             <span>Chat Intelligence</span>
           </Link>
-
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16171b] transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Landing</span>
-          </Link>
         </nav>
       </div>
 
@@ -212,35 +201,8 @@ export function EchoSidebar({
         )}
       </div>
 
-      {/* ── Upgrade Card (Matching user image) ───────────────────────── */}
-      <div className="p-3">
-        <div className="rounded-2xl bg-[#181a20] border border-[#262933] p-4 text-left shadow-sm">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-white mb-1">
-            <Sparkles className="w-3.5 h-3.5 text-[#b6f526]" />
-            <span>Your trial ends in 7 days</span>
-          </div>
-          <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
-            Keep enjoying unlimited chats, detailed reports, and premium AI tools without interruption.
-          </p>
-          <button
-            onClick={() => alert('DocuMind Pro is active on your workspace!')}
-            className="w-full bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] shadow-sm shadow-[#b6f526]/20"
-          >
-            <span>Upgrade</span>
-            <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
-          </button>
-        </div>
-      </div>
-
-      {/* ── Footer / Help & Account ──────────────────────────────────── */}
-      <div className="p-3 border-t border-[#202228] space-y-1">
-        <Link
-          to="/dashboard"
-          className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-[#16171b] transition-colors"
-        >
-          <HelpCircle className="w-3.5 h-3.5" />
-          <span>Help Center</span>
-        </Link>
+      {/* ── Footer / Account ────────────────────────────────────────── */}
+      <div className="p-3 border-t border-[#202228]">
         <AccountControl />
       </div>
     </aside>
