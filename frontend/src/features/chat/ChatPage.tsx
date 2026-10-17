@@ -3,11 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import {
   Brain,
-  FileText,
   RotateCcw,
-  Share2,
-  Scale,
-  Cpu,
   ArrowLeft,
 } from 'lucide-react'
 import { ChatMessage, Citation } from './types'
@@ -20,6 +16,7 @@ import { SourceSnippetModal } from './components/SourceSnippetModal'
 import { EchoSidebar } from '@/app/EchoSidebar'
 import { MobileNav } from '@/app/MobileNav'
 import { apiClient } from '@/lib/api-client'
+import { formatUserDisplayName } from '@/lib/formatters'
 
 export function ChatPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -52,8 +49,7 @@ export function ChatPage() {
     retry: false,
   })
 
-  const userName = userProfile?.email ? userProfile.email.split('@')[0] : 'Olivia Brooks'
-  const displayName = userName.charAt(0).toUpperCase() + userName.slice(1)
+  const displayName = formatUserDisplayName(userProfile?.email)
 
   // Load message history when selecting a conversation
   const { data: activeConvDetail } = useConversation(activeConversationId)
@@ -204,14 +200,6 @@ export function ChatPage() {
                 </button>
               )}
 
-              <button
-                type="button"
-                onClick={() => alert('Link copied to clipboard!')}
-                className="w-8 h-8 rounded-full border border-gray-200 hover:bg-gray-100 text-gray-600 flex items-center justify-center transition-colors"
-                title="Share conversation"
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
 
               <div
                 className="w-8 h-8 rounded-full bg-[#b6f526] text-black font-bold flex items-center justify-center text-xs shadow-sm cursor-pointer"
@@ -256,59 +244,6 @@ export function ChatPage() {
                   />
                 </div>
 
-                {/* 3 Prompt Cards below input (exact match from user image) */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2 text-left">
-                  <div
-                    onClick={() => handleSend('Can you summarize my uploaded document and highlight key points?')}
-                    className="card-prompt group"
-                  >
-                    <div className="icon-container-lime">
-                      <FileText className="w-5 h-5 text-black" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-black">
-                        Legal Insights
-                      </h3>
-                      <p className="text-xs text-gray-500 leading-relaxed">
-                        Explore the latest updates and key discussions on legal topics today.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => handleSend('What are the core technical skills, projects, and domain standards mentioned?')}
-                    className="card-prompt group"
-                  >
-                    <div className="icon-container-lime">
-                      <Scale className="w-5 h-5 text-black" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-black">
-                        Global Justice
-                      </h3>
-                      <p className="text-xs text-gray-500 leading-relaxed">
-                        Discover important trends and changes shaping international standards.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => handleSend('Extract action items, dates, and conclusions from the source documentation.')}
-                    className="card-prompt group"
-                  >
-                    <div className="icon-container-lime">
-                      <Cpu className="w-5 h-5 text-black" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-black">
-                        Modern Law & Technology
-                      </h3>
-                      <p className="text-xs text-gray-500 leading-relaxed">
-                        Explore the latest updates and key technical parameters shaping the system.
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           ) : (

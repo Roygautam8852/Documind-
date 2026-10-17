@@ -17,6 +17,7 @@ import { EchoSidebar } from '@/app/EchoSidebar'
 import { MobileNav } from '@/app/MobileNav'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { formatUserDisplayName } from '@/lib/formatters'
 
 export function DashboardPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false)
@@ -31,8 +32,7 @@ export function DashboardPage() {
   })
 
   const documentCount = isLoading ? '...' : isError ? '0' : String(data?.total ?? 0)
-  const userName = userProfile?.email ? userProfile.email.split('@')[0] : 'Olivia Brooks'
-  const displayName = userName.charAt(0).toUpperCase() + userName.slice(1)
+  const displayName = formatUserDisplayName(userProfile?.email)
 
   return (
     <div className="flex h-screen bg-[#F4F5F7] overflow-hidden selection:bg-[#b6f526] selection:text-black">

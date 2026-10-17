@@ -47,7 +47,7 @@ export function ChatInput({
   const hasContent = text.trim().length > 0
 
   return (
-    <div className="relative bg-white border border-gray-200/90 rounded-[24px] shadow-lg shadow-black/[0.04] p-3 transition-all focus-within:border-gray-300 focus-within:shadow-xl focus-within:ring-2 focus-within:ring-[#b6f526]">
+    <div className="relative bg-white border border-gray-200/90 rounded-[24px] shadow-lg shadow-black/[0.04] p-3 transition-all focus-within:border-gray-400 focus-within:shadow-xl">
       <textarea
         ref={textareaRef}
         value={text}
@@ -83,7 +83,7 @@ export function ChatInput({
             disabled={!hasContent || isLoading || disabled}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm active:scale-95 ${
               hasContent
-                ? 'bg-[#111215] text-white hover:bg-black ring-2 ring-[#b6f526]'
+                ? 'bg-[#111215] text-white hover:bg-black shadow-md'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
             aria-label="Send message"
