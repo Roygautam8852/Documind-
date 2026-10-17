@@ -55,8 +55,8 @@ export function ChatInput({
         onKeyDown={handleKeyDown}
         placeholder={disabled ? 'No ready documents. Upload documents first.' : placeholder}
         disabled={disabled || isLoading}
-        rows={1}
-        className="w-full resize-none bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none px-3 pt-1 pb-2 min-h-[42px] max-h-[180px]"
+        style={{ outline: 'none', boxShadow: 'none' }}
+        className="w-full resize-none bg-transparent text-sm text-gray-900 placeholder-gray-400 border-0 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 px-3 pt-1 pb-2 min-h-[42px] max-h-[180px]"
       />
 
       <div className="flex items-center justify-between px-2 pt-1">
