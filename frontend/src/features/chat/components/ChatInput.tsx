@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react'
-import { ArrowUp, Loader2, Plus } from 'lucide-react'
+import { ArrowUp, Loader2, Plus, Sparkles, Mic } from 'lucide-react'
 
 interface ChatInputProps {
   onSend: (question: string) => void
@@ -14,7 +14,7 @@ export function ChatInput({
   isLoading,
   disabled = false,
   onAttachClick,
-  placeholder = 'Ask Anything...',
+  placeholder = 'Ask DocuMind anything...',
 }: ChatInputProps) {
   const [text, setText] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -47,7 +47,7 @@ export function ChatInput({
   const hasContent = text.trim().length > 0
 
   return (
-    <div className="relative bg-white border border-gray-200/90 rounded-[24px] shadow-lg shadow-black/[0.04] p-3 transition-all focus-within:border-gray-400 focus-within:shadow-xl">
+    <div className="relative bg-white border border-gray-200/90 rounded-[28px] sm:rounded-[32px] shadow-md shadow-black/[0.03] p-2.5 sm:p-3 transition-all focus-within:border-gray-400 focus-within:shadow-xl">
       <textarea
         ref={textareaRef}
         value={text}
@@ -55,8 +55,9 @@ export function ChatInput({
         onKeyDown={handleKeyDown}
         placeholder={disabled ? 'No ready documents. Upload documents first.' : placeholder}
         disabled={disabled || isLoading}
+        rows={1}
         style={{ outline: 'none', boxShadow: 'none' }}
-        className="w-full resize-none bg-transparent text-sm text-gray-900 placeholder-gray-400 border-0 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 px-3 pt-1 pb-2 min-h-[42px] max-h-[180px]"
+        className="w-full resize-none bg-transparent text-sm sm:text-[15px] text-gray-900 placeholder-gray-400 border-0 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 px-3 pt-1.5 pb-2 min-h-[44px] max-h-[180px]"
       />
 
       <div className="flex items-center justify-between px-2 pt-1">
@@ -71,12 +72,25 @@ export function ChatInput({
           <Plus className="w-4 h-4 stroke-[2.5]" />
         </button>
 
-        {/* Right: Audio Waveform & Send Button */}
+        {/* Right: ChatGPT style features & Send button */}
         <div className="flex items-center gap-2">
-          <div className="text-gray-400 text-xs px-2 select-none font-mono" title="Voice assistant ready">
-            ılılı
+          {/* Subtle Think / Model indicator pill */}
+          <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100/90 border border-gray-200/60 text-xs font-semibold text-gray-600 select-none">
+            <Sparkles className="w-3.5 h-3.5 text-[#3b6009]" />
+            <span>Think</span>
           </div>
 
+          {/* Voice Waveform / Mic icon */}
+          <button
+            type="button"
+            onClick={() => alert('Voice input is ready in this workspace!')}
+            className="w-8 h-8 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 flex items-center justify-center transition-colors"
+            title="Voice input"
+          >
+            <Mic className="w-4 h-4" />
+          </button>
+
+          {/* Up arrow circular Send Button */}
           <button
             type="button"
             onClick={handleSubmit}

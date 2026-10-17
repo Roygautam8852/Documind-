@@ -221,69 +221,73 @@ export function ChatPage() {
           {/* ── Content Area: Empty State vs Message History ───────── */}
           {messages.length === 0 ? (
             <div className="flex-1 overflow-y-auto flex flex-col justify-center items-center px-4 sm:px-8 py-8">
-              <div className="w-full max-w-2xl space-y-8 text-center animate-fade-in">
-                {/* Echo Hero Heading (Directly from user's image) */}
+              <div className="w-full max-w-2xl space-y-6 text-center animate-fade-in">
+                {/* Hero Greeting Heading */}
                 <div className="space-y-2">
                   <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
                     Hello, {displayName}
                   </h1>
-                  <p className="text-xl sm:text-3xl font-medium text-gray-500">
+                  <p className="text-xl sm:text-2xl font-medium text-gray-500">
                     Let's make your research easier.
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-400 pt-1">
-                    Your personal AI assistant for documents, research, and knowledge.
+                  <p className="text-xs sm:text-sm text-gray-400">
+                    Your personal AI assistant for documents, research, and verified knowledge.
                   </p>
                 </div>
 
                 {/* Central Floating Prompt Input Box */}
-                <div className="text-left">
+                <div className="text-left w-full">
                   <ChatInput
                     onSend={handleSend}
                     isLoading={chatMutation.isPending}
-                    placeholder="Ask Anything..."
+                    placeholder="Ask DocuMind anything..."
                   />
+                  <p className="text-[11px] text-gray-400 text-center mt-2.5 select-none">
+                    DocuMind can make mistakes. Verify important info from source documents.
+                  </p>
                 </div>
-
               </div>
             </div>
           ) : (
-            /* Active Message Stream */
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-                {messages.map((message) => (
-                  <ChatMessageItem
-                    key={message.id}
-                    message={message}
-                    onSelectCitation={setActiveCitation}
-                  />
-                ))}
+            /* Active Message Stream (ChatGPT centered format) */
+            <div className="flex-1 flex flex-col overflow-hidden bg-white">
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
+                <div className="max-w-3xl mx-auto w-full space-y-7 pb-4">
+                  {messages.map((message) => (
+                    <ChatMessageItem
+                      key={message.id}
+                      message={message}
+                      onSelectCitation={setActiveCitation}
+                      onRegenerate={() => {
+                        const lastUser = [...messages].reverse().find((m) => m.sender === 'user')
+                        if (lastUser) handleSend(lastUser.text)
+                      }}
+                    />
+                  ))}
 
-                {chatMutation.isPending && (
-                  <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-2xl mr-6 sm:mr-16 animate-pulse">
-                    <div className="w-8 h-8 rounded-xl bg-[#b6f526] text-black font-bold flex items-center justify-center">
-                      <Brain className="w-4 h-4 text-black animate-spin" />
+                  {chatMutation.isPending && (
+                    <div className="flex items-center gap-2.5 text-gray-500 text-sm animate-pulse pl-1">
+                      <div className="w-6 h-6 rounded-lg bg-[#b6f526] text-black font-bold flex items-center justify-center text-xs shadow-sm">
+                        <Brain className="w-3.5 h-3.5 text-black animate-spin" />
+                      </div>
+                      <span className="font-medium text-gray-600">DocuMind is thinking and synthesizing sources...</span>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-bold text-gray-900">
-                        DocuMind & Gemini 3.8 Flash analyzing documents...
-                      </p>
-                      <p className="text-[11px] text-gray-500">
-                        Retrieving vector chunks and verifying facts
-                      </p>
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
               </div>
 
-              {/* Bottom Fixed Floating Input Bar */}
-              <div className="p-4 border-t border-gray-100 bg-white">
-                <div className="max-w-4xl mx-auto">
+              {/* Bottom Fixed Floating Input Bar (ChatGPT centered layout) */}
+              <div className="p-4 bg-white/95 backdrop-blur-md border-t border-gray-100">
+                <div className="max-w-3xl mx-auto w-full">
                   <ChatInput
                     onSend={handleSend}
                     isLoading={chatMutation.isPending}
                     placeholder="Ask a follow-up question..."
                   />
+                  <p className="text-[11px] text-gray-400 text-center mt-2 select-none">
+                    DocuMind can make mistakes. Verify important info from source documents.
+                  </p>
                 </div>
               </div>
             </div>
