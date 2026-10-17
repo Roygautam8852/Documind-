@@ -52,34 +52,64 @@ class OpenAILLMProvider(BaseLLMProvider):
         if self._api_key:
             headers["Authorization"] = f"Bearer {self._api_key}"
 
-        payload: dict[str, Any] = {
-            "model": self._model_name,
-            "messages": messages,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-        }
+        # Candidate fallback models if primary model encounters rate limit (429) or model-not-found (404)
+        models_to_try = [self._model_name]
+        for fallback_candidate in ("gemini-3.7-flash", "gemini-3.5-flash", "gemini-flash-lite-latest"):
+            if fallback_candidate not in models_to_try:
+                models_to_try.append(fallback_candidate)
 
-        try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.post(
-                    self._endpoint,
-                    headers=headers,
-                    json=payload,
+        last_error: Exception | None = None
+
+        for idx, model_candidate in enumerate(models_to_try):
+            payload: dict[str, Any] = {
+                "model": model_candidate,
+                "messages": messages,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+            }
+
+            try:
+                async with httpx.AsyncClient(timeout=self._timeout) as client:
+                    response = await client.post(
+                        self._endpoint,
+                        headers=headers,
+                        json=payload,
+                    )
+                    response.raise_for_status()
+                    data = response.json()
+                    choice = data["choices"][0]
+                    content: str = choice["message"]["content"]
+                    return content.strip()
+            except httpx.HTTPStatusError as exc:
+                last_error = exc
+                status = exc.response.status_code
+                if status in (429, 404, 503) and idx < len(models_to_try) - 1:
+                    logger.warning(
+                        "LLM model '%s' returned status %s (%s). Attempting fallback to '%s'...",
+                        model_candidate,
+                        status,
+                        exc.response.text[:120],
+                        models_to_try[idx + 1],
+                    )
+                    continue
+                logger.error(
+                    "OpenAI API returned error %s for model %s: %s",
+                    status,
+                    model_candidate,
+                    exc.response.text,
                 )
-                response.raise_for_status()
-                data = response.json()
-                choice = data["choices"][0]
-                content: str = choice["message"]["content"]
-                return content.strip()
-        except httpx.HTTPStatusError as exc:
-            logger.error(
-                "OpenAI API returned error %s: %s", exc.response.status_code, exc.response.text
-            )
+                raise LLMProviderError(
+                    message="The AI provider returned an error while generating a response."
+                ) from exc
+            except (httpx.RequestError, KeyError, IndexError) as exc:
+                last_error = exc
+                logger.error("OpenAI API request failed: %s", type(exc).__name__)
+                raise LLMProviderError(
+                    message="The AI provider is temporarily unreachable. Please try again."
+                ) from exc
+
+        if last_error:
             raise LLMProviderError(
-                message="The AI provider returned an error while generating a response."
-            ) from exc
-        except (httpx.RequestError, KeyError, IndexError) as exc:
-            logger.error("OpenAI API request failed: %s", type(exc).__name__)
-            raise LLMProviderError(
-                message="The AI provider is temporarily unreachable. Please try again."
-            ) from exc
+                message="All available AI provider models were exhausted."
+            ) from last_error
+        raise LLMProviderError(message="No response generated.")

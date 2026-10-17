@@ -246,7 +246,7 @@ export function LandingPage() {
                 step: '03',
                 icon: Quote,
                 title: 'Get cited answers',
-                desc: 'Gemini 3.8 Flash synthesizes verified answers accompanied by verifiable [S1] source citations.',
+                desc: 'Gemini 3.7 Flash synthesizes verified answers accompanied by verifiable [S1] source citations.',
               },
             ].map(({ step, icon: Icon, title, desc }) => (
               <div key={step} className="card p-6 relative overflow-hidden group">
@@ -287,7 +287,7 @@ export function LandingPage() {
               },
               {
                 icon: Sparkles,
-                title: 'Gemini 3.8 Flash generative power',
+                title: 'Gemini 3.7 Flash generative power',
                 desc: 'State-of-the-art reasoning produces beautifully structured, professional answers and summaries.',
               },
               {
@@ -320,7 +320,7 @@ export function LandingPage() {
             <span>DocuMind Intelligence</span>
           </div>
           <p className="text-xs text-slate-500">
-            Powered by Google Gemini 3.8 Flash & Vector Search. Built for precision document synthesis.
+            Powered by Google Gemini 3.7 Flash & Vector Search. Built for precision document synthesis.
           </p>
         </div>
       </footer>

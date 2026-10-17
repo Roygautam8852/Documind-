@@ -181,7 +181,7 @@ export function ChatMessageItem({ message, onSelectCitation, onRegenerate }: Cha
         </div>
         <span className="font-bold text-gray-900 text-sm">DocuMind</span>
         <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#b6f526]/20 text-[#3b6009] border border-[#b6f526]/40 font-semibold">
-          Gemini 3.8 Flash
+          Gemini 3.7 Flash
         </span>
         {message.retrievalStrategy && (
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-mono">

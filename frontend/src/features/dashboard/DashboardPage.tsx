@@ -65,7 +65,7 @@ export function DashboardPage() {
             <span className="text-gray-300">|</span>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#b6f526]/20 border border-[#b6f526]/40 text-xs font-semibold text-[#3b6009]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#52840b] animate-pulse" />
-              Gemini 3.8 Flash Active
+              Gemini 3.7 Flash Active
             </div>
           </div>
 
