@@ -79,11 +79,17 @@ async def _run_ingestion(document_id: str, owner_id: str) -> None:
 
 async def _ingest(session: AsyncSession, document_id: str, owner_id: str) -> None:
     """Core ingestion logic within an open session."""
-    # 1. Load document record
-    result = await session.execute(
-        select(Document).where(Document.id == document_id, Document.owner_id == owner_id)
-    )
-    doc = result.scalar_one_or_none()
+    # 1. Load document record (with retry loop in case transaction commit is propagating)
+    doc = None
+    for attempt in range(5):
+        result = await session.execute(
+            select(Document).where(Document.id == document_id, Document.owner_id == owner_id)
+        )
+        doc = result.scalar_one_or_none()
+        if doc is not None:
+            break
+        await asyncio.sleep(0.15)
+
     if doc is None:
         logger.warning("Document not found for ingestion: %s", document_id)
         return

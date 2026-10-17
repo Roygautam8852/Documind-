@@ -144,7 +144,8 @@ async def upload_document(
         raise MalformedFileError(message="Could not save the uploaded file.") from exc
 
     doc.stored_object_key = object_key
-    await db.flush()
+    await db.commit()
+    await db.refresh(doc)
 
     logger.info(
         "Document uploaded: id=%s owner=%s size=%d",
@@ -294,7 +295,8 @@ async def retry_ingestion(
     doc.status = "uploaded"
     doc.error_code = None
     doc.safe_error_message = None
-    await db.flush()
+    await db.commit()
+    await db.refresh(doc)
 
     ingestion_service.schedule_ingestion(document_id=doc.id, owner_id=current_user_id)
     logger.info("Retry scheduled: document_id=%s", document_id)
