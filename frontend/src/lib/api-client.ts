@@ -10,21 +10,30 @@ const API_BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api/v1`
   : '/api/v1'
 
-// Token stored in memory with sessionStorage fallback for page refresh resilience
-let _accessToken: string | null = typeof window !== 'undefined' ? window.sessionStorage.getItem('documind_token') : null
+// Token stored in memory with localStorage and sessionStorage fallback
+let _accessToken: string | null =
+  typeof window !== 'undefined'
+    ? window.localStorage.getItem('documind_token') || window.sessionStorage.getItem('documind_token')
+    : null
 
 export function setAccessToken(token: string | null): void {
   _accessToken = token
   if (typeof window !== 'undefined') {
     if (token) {
+      window.localStorage.setItem('documind_token', token)
       window.sessionStorage.setItem('documind_token', token)
     } else {
+      window.localStorage.removeItem('documind_token')
       window.sessionStorage.removeItem('documind_token')
     }
   }
 }
 
 export function getAccessToken(): string | null {
+  if (!_accessToken && typeof window !== 'undefined') {
+    _accessToken =
+      window.localStorage.getItem('documind_token') || window.sessionStorage.getItem('documind_token')
+  }
   return _accessToken
 }
 

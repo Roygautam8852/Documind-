@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import {
   FileText,
   Brain,
@@ -12,8 +13,20 @@ import {
   Scale,
   Cpu,
 } from 'lucide-react'
+import { getAccessToken, apiClient } from '@/lib/api-client'
 
 export function LandingPage() {
+  const token = getAccessToken()
+  const { data: userProfile } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: () => apiClient.get<{ id: string; email: string }>('/auth/me'),
+    enabled: Boolean(token),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+
+  const isLoggedIn = Boolean(token)
+
   return (
     <div className="min-h-screen bg-[#F4F5F7] text-gray-900 selection:bg-[#b6f526] selection:text-black">
       {/* ── Top Navigation Bar ────────────────────────────────────────── */}
@@ -25,21 +38,52 @@ export function LandingPage() {
             </div>
             <span className="font-bold text-white text-lg tracking-tight">DocuMind</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/login"
-              className="text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-xl hover:bg-[#1c1e24] transition-colors"
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/register"
-              className="bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-sm px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-[#b6f526]/20 active:scale-95 flex items-center gap-1.5"
-            >
-              <span>Get started free</span>
-              <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
-            </Link>
-          </div>
+          {isLoggedIn ? (
+            <div className="flex items-center gap-2.5">
+              <Link
+                to="/dashboard"
+                className="text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-xl hover:bg-[#1c1e24] transition-colors"
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/documents"
+                className="text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-xl hover:bg-[#1c1e24] transition-colors hidden sm:inline-block"
+              >
+                Documents
+              </Link>
+              <Link
+                to="/chat"
+                className="bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-sm px-4 py-2 rounded-xl transition-all shadow-sm shadow-[#b6f526]/20 active:scale-95 flex items-center gap-1.5"
+              >
+                <span>Go to Chat</span>
+                <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
+              </Link>
+              <Link
+                to="/dashboard"
+                className="w-8 h-8 rounded-full bg-[#1c1e24] hover:bg-[#252830] border border-[#2d303a] text-white font-bold flex items-center justify-center text-xs transition-colors"
+                title={userProfile?.email ?? 'Logged in'}
+              >
+                {userProfile?.email ? userProfile.email[0].toUpperCase() : 'U'}
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link
+                to="/login"
+                className="text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-xl hover:bg-[#1c1e24] transition-colors"
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                className="bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-sm px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-[#b6f526]/20 active:scale-95 flex items-center gap-1.5"
+              >
+                <span>Get started free</span>
+                <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
+              </Link>
+            </div>
+          )}
         </div>
       </header>
 
@@ -65,22 +109,41 @@ export function LandingPage() {
             your content with verifiable source citations and page references.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Link
-              to="/register"
-              className="w-full sm:w-auto bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-base px-8 py-3.5 rounded-2xl transition-all shadow-md shadow-[#b6f526]/25 active:scale-95 flex items-center justify-center gap-2"
-            >
-              <span>Start for free</span>
-              <ArrowUpRight className="w-5 h-5 stroke-[2.5]" />
-            </Link>
-            <Link
-              to="/login"
-              className="w-full sm:w-auto bg-[#111215] hover:bg-[#1c1e24] text-white font-semibold text-base px-8 py-3.5 rounded-2xl transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
-            >
-              <span>Sign in to workspace</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+          {isLoggedIn ? (
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <Link
+                to="/chat"
+                className="w-full sm:w-auto bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-base px-8 py-3.5 rounded-2xl transition-all shadow-md shadow-[#b6f526]/25 active:scale-95 flex items-center justify-center gap-2"
+              >
+                <span>Open Chat Intelligence</span>
+                <ArrowUpRight className="w-5 h-5 stroke-[2.5]" />
+              </Link>
+              <Link
+                to="/dashboard"
+                className="w-full sm:w-auto bg-[#111215] hover:bg-[#1c1e24] text-white font-semibold text-base px-8 py-3.5 rounded-2xl transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
+              >
+                <span>Go to Dashboard</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <Link
+                to="/register"
+                className="w-full sm:w-auto bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-base px-8 py-3.5 rounded-2xl transition-all shadow-md shadow-[#b6f526]/25 active:scale-95 flex items-center justify-center gap-2"
+              >
+                <span>Start for free</span>
+                <ArrowUpRight className="w-5 h-5 stroke-[2.5]" />
+              </Link>
+              <Link
+                to="/login"
+                className="w-full sm:w-auto bg-[#111215] hover:bg-[#1c1e24] text-white font-semibold text-base px-8 py-3.5 rounded-2xl transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
+              >
+                <span>Sign in to workspace</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* ── Interactive EchoAI Mockup (Directly reflecting user's screenshot) ── */}
