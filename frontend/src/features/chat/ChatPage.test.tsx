@@ -86,15 +86,14 @@ describe('ChatPage', () => {
   it('renders chat header, conversation sidebar, and empty state suggestions', async () => {
     renderChatPage()
     expect(screen.getByText('Chat Intelligence')).toBeInTheDocument()
-    expect(screen.getByText('New Chat')).toBeInTheDocument()
-    expect(screen.getByText('Chat History')).toBeInTheDocument()
+    expect(screen.getByText('New chat')).toBeInTheDocument()
 
     await waitFor(() => {
       expect(screen.getByText('Previous Architecture Chat')).toBeInTheDocument()
     })
 
-    expect(screen.getByText(/Ask questions about your uploaded documents/i)).toBeInTheDocument()
-    expect(screen.getByText('What are the key points in this document?')).toBeInTheDocument()
+    expect(screen.getByText(/make your research easier/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/Ask DocuMind anything/i)).toBeInTheDocument()
   })
 
   it('submits a question and renders assistant response with citations', async () => {
@@ -117,7 +116,7 @@ describe('ChatPage', () => {
 
     renderChatPage()
 
-    const textarea = screen.getByPlaceholderText(/Ask a question about your documents/i)
+    const textarea = screen.getByPlaceholderText(/Ask DocuMind anything/i)
     fireEvent.change(textarea, { target: { value: 'How is tenant isolation handled?' } })
 
     const sendBtn = screen.getByLabelText('Send message')
@@ -134,7 +133,7 @@ describe('ChatPage', () => {
     })
 
     // Citations should be rendered
-    expect(screen.getByText(/Sources Referenced \(1\)/i)).toBeInTheDocument()
+    expect(screen.getByText(/Sources:/i)).toBeInTheDocument()
     expect(screen.getAllByText('architecture.pdf').length).toBeGreaterThanOrEqual(1)
   })
 
@@ -158,7 +157,7 @@ describe('ChatPage', () => {
 
     renderChatPage()
 
-    const textarea = screen.getByPlaceholderText(/Ask a question about your documents/i)
+    const textarea = screen.getByPlaceholderText(/Ask DocuMind anything/i)
     fireEvent.change(textarea, { target: { value: 'Performance summary' } })
     fireEvent.click(screen.getByLabelText('Send message'))
 
@@ -202,12 +201,12 @@ describe('ChatPage', () => {
     })
 
     // Click New Chat
-    const newChatBtn = screen.getByLabelText('Start a new chat')
+    const newChatBtn = screen.getByText('New chat')
     fireEvent.click(newChatBtn)
 
     // Historical messages should be cleared and empty suggestions shown
     expect(screen.queryByText('What is DocuMind architecture?')).not.toBeInTheDocument()
-    expect(screen.getByText(/Ask questions about your uploaded documents/i)).toBeInTheDocument()
+    expect(screen.getByText(/make your research easier/i)).toBeInTheDocument()
   })
 
   it('renders error message when chat query API rejects', async () => {
@@ -215,12 +214,12 @@ describe('ChatPage', () => {
 
     renderChatPage()
 
-    const textarea = screen.getByPlaceholderText(/Ask a question about your documents/i)
+    const textarea = screen.getByPlaceholderText(/Ask DocuMind anything/i)
     fireEvent.change(textarea, { target: { value: 'Test failing question' } })
     fireEvent.click(screen.getByLabelText('Send message'))
 
     await waitFor(() => {
-      expect(screen.getByText(/Unable to complete query/i)).toBeInTheDocument()
+      expect(screen.getByText(/Query Error/i)).toBeInTheDocument()
       expect(screen.getByText(/AI provider connection timeout/i)).toBeInTheDocument()
     })
   })

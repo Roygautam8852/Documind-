@@ -79,7 +79,7 @@ export function DocumentSelector({ selectedDocId, onSelectDocId }: DocumentSelec
 
       {/* Dropdown Menu Popover */}
       {isOpen && (
-        <div className="absolute top-full mt-2 left-0 sm:left-auto sm:right-0 z-50 min-w-[260px] max-w-[320px] bg-white rounded-2xl shadow-xl border border-gray-200/90 p-2 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute top-full mt-2 left-0 sm:left-auto sm:right-0 z-50 min-w-[260px] max-w-[320px] bg-[#1c1e25] rounded-2xl shadow-2xl border border-[#2c2f3d] p-2 space-y-1 animate-in fade-in zoom-in-95 duration-150">
           <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400">
             Query Scope
           </div>
@@ -94,27 +94,27 @@ export function DocumentSelector({ selectedDocId, onSelectDocId }: DocumentSelec
             }}
             className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
               selectedDocId === null
-                ? 'bg-[#b6f526]/25 text-gray-900 border border-[#b6f526]/60'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-black border border-transparent'
+                ? 'bg-[#b6f526]/15 text-white border border-[#b6f526]/40'
+                : 'text-gray-300 hover:bg-[#252833] hover:text-white border border-transparent'
             }`}
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-[#b6f526]/30 flex items-center justify-center shrink-0">
-                <Layers className="w-4 h-4 text-black" />
+              <div className="w-7 h-7 rounded-lg bg-[#b6f526]/20 flex items-center justify-center shrink-0">
+                <Layers className="w-4 h-4 text-[#b6f526]" />
               </div>
               <div className="text-left">
-                <div className="font-bold text-gray-900">All Documents</div>
-                <div className="text-[10px] text-gray-500 font-normal">
+                <div className="font-bold text-white">All Documents</div>
+                <div className="text-[10px] text-gray-400 font-normal">
                   Ask questions across all {readyDocs.length} files
                 </div>
               </div>
             </div>
             {selectedDocId === null && (
-              <Check className="w-4 h-4 text-[#3b6009] stroke-[3] shrink-0" />
+              <Check className="w-4 h-4 text-[#b6f526] stroke-[3] shrink-0" />
             )}
           </button>
 
-          <div className="border-t border-gray-100 my-1" />
+          <div className="border-t border-[#292c37] my-1" />
 
           {/* Specific Document Options */}
           <div className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
@@ -134,17 +134,17 @@ export function DocumentSelector({ selectedDocId, onSelectDocId }: DocumentSelec
                   }}
                   className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl text-xs transition-all ${
                     isSelected
-                      ? 'bg-[#b6f526]/25 text-gray-900 font-bold border border-[#b6f526]/60'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-black border border-transparent'
+                      ? 'bg-[#b6f526]/15 text-white font-bold border border-[#b6f526]/40'
+                      : 'text-gray-300 hover:bg-[#252833] hover:text-white border border-transparent'
                   }`}
                   title={doc.original_filename}
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <FileText className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                    <FileText className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                     <span className="truncate text-left">{doc.original_filename}</span>
                   </div>
                   {isSelected && (
-                    <Check className="w-3.5 h-3.5 text-[#3b6009] stroke-[3] shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-[#b6f526] stroke-[3] shrink-0" />
                   )}
                 </button>
               )
