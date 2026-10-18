@@ -141,29 +141,29 @@ export function UploadDropzone({ onUploadSuccess, onClose }: UploadDropzoneProps
         data-testid="dropzone-area"
         className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
           isDragOver
-            ? 'border-[#b6f526] bg-[#b6f526]/10 scale-[1.01]'
-            : 'border-gray-200 hover:border-[#b6f526] bg-gray-50 hover:bg-white'
+            ? 'border-[#c8ff54] bg-[#c8ff54]/10 scale-[1.01]'
+            : 'border-[#2e313d] hover:border-[#c8ff54] bg-[#16171b] hover:bg-[#1a1c22]'
         }`}
       >
-        <div className="w-12 h-12 rounded-2xl bg-[#b6f526] text-black flex items-center justify-center mx-auto mb-3 shadow-sm font-bold">
+        <div className="w-12 h-12 rounded-2xl bg-[#c8ff54] text-black flex items-center justify-center mx-auto mb-3 shadow-sm font-bold">
           <UploadCloud className="w-6 h-6 text-black stroke-[2.2]" />
         </div>
-        <p className="text-sm font-bold text-gray-900 mb-1">
+        <p className="text-sm font-bold text-white mb-1">
           {isDragOver ? 'Drop file here' : 'Click to select or drag and drop'}
         </p>
-        <p className="text-xs text-gray-500">PDF, DOCX, or TXT up to 50 MB</p>
+        <p className="text-xs text-slate-400">PDF, DOCX, or TXT up to 50 MB</p>
       </div>
 
       {/* Selected File Details */}
       {selectedFile && (
-        <div className="mt-4 p-3 bg-white rounded-xl flex items-center justify-between border border-gray-200 shadow-sm">
+        <div className="mt-4 p-3 bg-[#16171b] rounded-xl flex items-center justify-between border border-[#2e313d] shadow-sm">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-[#b6f526]/30 text-black flex items-center justify-center shrink-0">
-              <File className="w-4 h-4 text-black" />
+            <div className="w-8 h-8 rounded-lg bg-[#c8ff54]/20 text-[#c8ff54] flex items-center justify-center shrink-0">
+              <File className="w-4 h-4 text-[#c8ff54]" />
             </div>
             <div className="truncate">
-              <p className="text-sm font-bold text-gray-900 truncate">{selectedFile.name}</p>
-              <p className="text-xs text-gray-500">{formatBytes(selectedFile.size)}</p>
+              <p className="text-sm font-bold text-white truncate">{selectedFile.name}</p>
+              <p className="text-xs text-slate-400">{formatBytes(selectedFile.size)}</p>
             </div>
           </div>
           <button

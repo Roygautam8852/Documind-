@@ -41,8 +41,8 @@ function StatusBadge({ status, safeErrorMessage }: { status: DocumentStatus; saf
   switch (status) {
     case 'ready':
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#b6f526]/20 text-[#3b6009] border border-[#b6f526]/40">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#3b6009]" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#c8ff54]/15 text-[#c8ff54] border border-[#c8ff54]/30">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#c8ff54]" />
           Ready
         </span>
       )
@@ -309,7 +309,7 @@ export function DocumentList({ onOpenUpload }: DocumentListProps) {
                         <>
                           <Link
                             to={`/chat?docId=${doc.id}`}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#b6f526] hover:bg-[#a5e61c] text-black font-bold text-xs rounded-lg transition-all shadow-sm shadow-[#b6f526]/20 active:scale-95"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#c8ff54] hover:bg-[#d8ff66] text-black font-bold text-xs rounded-lg transition-all shadow-sm shadow-[#c8ff54]/20 active:scale-95"
                             title="Chat with this document"
                             aria-label={`Chat with ${doc.original_filename}`}
                           >
@@ -319,17 +319,17 @@ export function DocumentList({ onOpenUpload }: DocumentListProps) {
                           <button
                             type="button"
                             onClick={() => setDocumentToSummarize(doc)}
-                            className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-white hover:bg-[#22242c] rounded-lg transition-colors"
                             title="Summarize document"
                             aria-label={`Summarize ${doc.original_filename}`}
                           >
-                            <Sparkles className="w-4 h-4 text-gray-600" />
+                            <Sparkles className="w-4 h-4 text-gray-400 hover:text-white" />
                           </button>
                         </>
                       )}
                       <button
                         onClick={() => setDocumentToDelete(doc)}
-                        className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
                         title="Delete document"
                         aria-label={`Delete ${doc.original_filename}`}
                       >
