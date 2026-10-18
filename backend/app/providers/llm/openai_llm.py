@@ -52,9 +52,13 @@ class OpenAILLMProvider(BaseLLMProvider):
         if self._api_key:
             headers["Authorization"] = f"Bearer {self._api_key}"
 
-        # Candidate fallback models if primary model encounters rate limit (429) or model-not-found (404)
+        # Candidate fallback models for rate limits (429) or missing models (404).
         models_to_try = [self._model_name]
-        for fallback_candidate in ("gemini-3.7-flash", "gemini-3.5-flash", "gemini-flash-lite-latest"):
+        for fallback_candidate in (
+            "gemini-3.7-flash",
+            "gemini-3.5-flash",
+            "gemini-flash-lite-latest",
+        ):
             if fallback_candidate not in models_to_try:
                 models_to_try.append(fallback_candidate)
 

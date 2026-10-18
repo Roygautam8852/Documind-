@@ -57,6 +57,35 @@ class MockLLMProvider(BaseLLMProvider):
             re.DOTALL,
         )
 
+        system_lower = (system_prompt or "").lower()
+        evidence_items = [(sid, text.strip()) for sid, text in source_blocks if text.strip()]
+
+        if "specialized in synthesizing and summarizing documents" in system_lower:
+            cited_evidence = [f"- {text} [{sid}]" for sid, text in evidence_items]
+            if "comprehensive detailed summary" in prompt.lower():
+                return "### Detailed Breakdown\n\n" + "\n\n".join(cited_evidence)
+            if "key takeaways summary" in prompt.lower():
+                return "### Key Takeaways\n\n" + "\n".join(cited_evidence)
+            return (
+                "### Executive Summary\n\n"
+                + (cited_evidence[0][2:] if cited_evidence else "No source text was available.")
+                + "\n\n### Key Highlights\n\n"
+                + "\n".join(cited_evidence)
+            )
+
+        if "specialized in comparative analysis across multiple documents" in system_lower:
+            highlights = [f"- {text} [{sid}]" for sid, text in evidence_items]
+            return (
+                "### Cross-Document Comparison\n\n"
+                "### Comparison Overview\n\n"
+                "The deterministic mock lists the supplied evidence without inferring analysis.\n\n"
+                "### Key Similarities\n\n"
+                "No similarities are inferred by the deterministic mock.\n\n"
+                "### Key Differences & Divergences\n\n"
+                "No differences are inferred by the deterministic mock.\n\n"
+                "### Document-Specific Highlights\n\n" + "\n".join(highlights)
+            )
+
         first_text = source_blocks[0][1] if source_blocks else ""
         first_lines = [line.strip() for line in first_text.strip().splitlines() if line.strip()]
 
@@ -71,7 +100,24 @@ class MockLLMProvider(BaseLLMProvider):
                         cleaned
                         and 2 <= len(cleaned.split()) <= 4
                         and not any(char.isdigit() for char in cleaned)
-                        and not any(c in cleaned for c in [":", "@", "/", "-", "•", "(", ")", "+", "|", "–", "—", "’", "'"])
+                        and not any(
+                            c in cleaned
+                            for c in [
+                                ":",
+                                "@",
+                                "/",
+                                "-",
+                                "•",
+                                "(",
+                                ")",
+                                "+",
+                                "|",
+                                "–",
+                                "—",
+                                "’",
+                                "'",
+                            ]
+                        )
                         and not any(
                             w in cleaned.lower()
                             for w in [
@@ -114,49 +160,108 @@ class MockLLMProvider(BaseLLMProvider):
             return ans.strip()
 
         # 3. Skills / Tech stack query
-        if any(k in q_lower for k in ["skill", "stack", "technolog", "tool", "programming", "language"]):
+        if any(
+            k in q_lower for k in ["skill", "stack", "technolog", "tool", "programming", "language"]
+        ):
             skill_lines = [
                 line
                 for line in first_lines
                 if any(
                     kw in line.lower()
-                    for kw in ["skill", "stack", "language", "python", "java", "c++", "framework", "sql", "git"]
+                    for kw in [
+                        "skill",
+                        "stack",
+                        "language",
+                        "python",
+                        "java",
+                        "c++",
+                        "framework",
+                        "sql",
+                        "git",
+                    ]
                 )
             ]
             if skill_lines:
                 formatted = "\n".join(f"- {line.lstrip('• ')}" for line in skill_lines[:5])
-                return f"According to your document [{primary_source}], key skills and technologies include:\n\n{formatted} [{primary_source}]"
+                return (
+                    f"According to your document [{primary_source}], "
+                    f"key skills and technologies include:\n\n{formatted} [{primary_source}]"
+                )
 
         # 4. Education query
-        if any(k in q_lower for k in ["education", "degree", "university", "college", "school", "bachelor", "master"]):
+        if any(
+            k in q_lower
+            for k in [
+                "education",
+                "degree",
+                "university",
+                "college",
+                "school",
+                "bachelor",
+                "master",
+            ]
+        ):
             edu_lines = [
                 line
                 for line in first_lines
                 if any(
                     kw in line.lower()
-                    for kw in ["university", "college", "school", "b.tech", "degree", "percentage", "cgpa", "matriculation", "intermediate"]
+                    for kw in [
+                        "university",
+                        "college",
+                        "school",
+                        "b.tech",
+                        "degree",
+                        "percentage",
+                        "cgpa",
+                        "matriculation",
+                        "intermediate",
+                    ]
                 )
             ]
             if edu_lines:
                 formatted = "\n".join(f"- {line.lstrip('• ')}" for line in edu_lines[:4])
-                return f"According to your document [{primary_source}], educational background includes:\n\n{formatted} [{primary_source}]"
+                return (
+                    f"According to your document [{primary_source}], "
+                    f"educational background includes:\n\n{formatted} [{primary_source}]"
+                )
 
         # 5. Experience / Projects query
-        if any(k in q_lower for k in ["project", "experience", "work", "dashboard", "training", "achievement"]):
+        if any(
+            k in q_lower
+            for k in ["project", "experience", "work", "dashboard", "training", "achievement"]
+        ):
             proj_lines = [
                 line
                 for line in first_lines
                 if any(
                     kw in line.lower()
-                    for kw in ["project", "dashboard", "training", "achievement", "developed", "created", "solved", "designed"]
+                    for kw in [
+                        "project",
+                        "dashboard",
+                        "training",
+                        "achievement",
+                        "developed",
+                        "created",
+                        "solved",
+                        "designed",
+                    ]
                 )
             ]
             if proj_lines:
                 formatted = "\n".join(f"- {line.lstrip('• ')}" for line in proj_lines[:4])
-                return f"Key projects and experience highlighted in your document [{primary_source}]:\n\n{formatted} [{primary_source}]"
+                return (
+                    f"Key projects and experience highlighted in your document "
+                    f"[{primary_source}]:\n\n{formatted} [{primary_source}]"
+                )
 
         # 6. Comparison query (only when user explicitly asks to compare)
-        if "compare" in q_lower or "comparison" in q_lower or "versus" in q_lower or "diff" in q_lower:
+        if (
+            "compare" in q_lower
+            or "comparison" in q_lower
+            or "versus" in q_lower
+            or "diff" in q_lower
+        ):
             return (
                 f"### Cross-Document Comparison\n\n"
                 f"Both documents address key domain standards [{primary_source}].\n\n"
@@ -168,11 +273,17 @@ class MockLLMProvider(BaseLLMProvider):
             )
 
         # 7. Summary / Key points query
-        if any(k in q_lower for k in ["summar", "key point", "highlight", "overview", "what is this", "about"]):
+        if any(
+            k in q_lower
+            for k in ["summar", "key point", "highlight", "overview", "what is this", "about"]
+        ):
             points = [line for line in first_lines if line.startswith("•") or len(line) > 35][:5]
             if points:
                 items = "\n".join(f"- {p.lstrip('• ')}" for p in points)
-                return f"### Document Summary [{primary_source}]\n\n{items}\n\nKey operational details are further documented in [{secondary_source}]."
+                return (
+                    f"### Document Summary [{primary_source}]\n\n{items}\n\n"
+                    f"Key operational details are further documented in [{secondary_source}]."
+                )
 
         # 8. Keyword matching across evidence
         q_words = set(re.findall(r"\w{3,}", q_lower))

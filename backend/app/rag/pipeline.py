@@ -246,7 +246,8 @@ async def query_rag(
     # 6. Abstention check with multi-document fallback
     if should_abstain(results, cfg.similarity_threshold):
         # Cross-document fallback: if a user asks a general question across all documents
-        # or semantic similarity didn't exceed threshold, retrieve key chunks from each ready document
+        # or semantic similarity didn't exceed threshold, retrieve key chunks from each ready
+        # document.
         valid_doc_ids = list(doc_filename_map.keys())
         fallback_stmt = (
             select(Chunk)

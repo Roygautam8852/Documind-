@@ -81,7 +81,7 @@ async def _ingest(session: AsyncSession, document_id: str, owner_id: str) -> Non
     """Core ingestion logic within an open session."""
     # 1. Load document record (with retry loop in case transaction commit is propagating)
     doc = None
-    for attempt in range(5):
+    for _attempt in range(5):
         result = await session.execute(
             select(Document).where(Document.id == document_id, Document.owner_id == owner_id)
         )
